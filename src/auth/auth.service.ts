@@ -1,12 +1,20 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DatabaseService } from 'src/database/database.service';
 import { SignupDto } from './dto/register.dto';
 import * as bcrypt from 'bcrypt'
+import { LoginDto } from './dto/login.dto';
+import { JwtService } from '@nestjs/jwt';
+import { Response } from 'express';
+import { cookieOptions } from 'src/constant';
 
 @Injectable()
 export class AuthService {
-    constructor(private prisma:DatabaseService){}
+    constructor(
+        private prisma:DatabaseService,
+        private jwt:JwtService,
+        private configservice:ConfigService
+    ){}
 
     async SignupUser(signupdto:SignupDto){
         const {name,email,phone,password}=signupdto;
@@ -35,9 +43,49 @@ export class AuthService {
 
     }
 
+    async SigninUser(signindto:LoginDto,res:Response){
+        const {email,password}=signindto;
+
+        const userAvailable=await this.prisma.user.findUnique({where:{email}})
+
+        if(!userAvailable){
+            throw new BadRequestException("Email not registered!!")
+        }
+
+        const isPasswordCorrect=await this.checkPassword(password,userAvailable.password);
+
+        if(!isPasswordCorrect)
+        {
+            throw new UnauthorizedException('Invalid credentials');
+        }
+
+        const token=await this.signToken({id:userAvailable.id,email:userAvailable.email})
+
+        if(!token){
+            throw new BadRequestException("token not available!!");
+        }
+
+        res.status(200)
+        .cookie('token',token,cookieOptions)
+        .json({
+            message:"User logged in successfully!!",
+            token
+        })
+    }
+
     async hashPassword(password:string){
         const saltRound=10;
         return await bcrypt.hash(password,saltRound)
+    }
+
+    async checkPassword(password:string,hash:string){
+        return bcrypt.compare(password,hash)
+    }
+
+    async signToken(args:{id:number ,email:string}){
+        const payload=args
+        const secret=this.configservice.get<string>('jwtsecret')
+        return this.jwt.sign(payload,{secret})
     }
     
 }
