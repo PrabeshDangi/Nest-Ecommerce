@@ -6,6 +6,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './Guard/Jwt.strategy';
+import { DatabaseService } from 'src/database/database.service';
 
 // @Module({
   
@@ -23,6 +24,7 @@ import { JwtStrategy } from './Guard/Jwt.strategy';
 
 @Module({
   imports: [
+    DatabaseModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -34,7 +36,7 @@ import { JwtStrategy } from './Guard/Jwt.strategy';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy,DatabaseService],
   exports: [AuthService, JwtModule, PassportModule],
 })
 export class AuthModule {}
