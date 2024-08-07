@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { PassportStrategy } from "@nestjs/passport";
 import {ExtractJwt, Strategy} from 'passport-jwt'
@@ -18,13 +18,19 @@ export class JwtStrategy extends PassportStrategy(Strategy){
     }
 
     private static extractJWT(req:Request):string|null{
+        console.log('Extracting JWT from cookies:', req.cookies.token);
         if(req.cookies && 'token' in req.cookies){
             return req.cookies.token
         }
         return null
     }
 
+
     async validate(payload: { id: string; email: string }) {
+        if (!payload) {
+            throw new UnauthorizedException('Invalid JWT payload');
+          }
+          console.log('Validating JWT payload:', payload);
         return payload;
       }
 }

@@ -1,4 +1,5 @@
-import { IsEmail, IsNotEmpty, IsString, Length, Matches } from 'class-validator'
+import { UserRole } from '@prisma/client'
+import { IsEmail, IsNotEmpty, IsOptional, IsString, Length, Matches } from 'class-validator'
 
 export class SignupDto{
     @IsString()
@@ -15,6 +16,9 @@ export class SignupDto{
     @Matches(/^\+?[1-9]\d{1,14}$/, { message: 'Phone number must be a valid format' })
     @IsNotEmpty()
     phone:string
+
+    @IsOptional()
+    role?:UserRole
 
     @IsNotEmpty()
     @IsString()

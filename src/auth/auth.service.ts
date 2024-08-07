@@ -32,7 +32,8 @@ export class AuthService {
                 name,
                 email,
                 password:hashedpassword,
-                phone
+                phone,
+                role:signupdto.role||"user",
             }
         })
 

@@ -15,6 +15,7 @@ async function bootstrap() {
     forbidNonWhitelisted:true
   }))
   app.use(cookieParser())
+  app.enableCors()
   await app.listen(port);
 }
 bootstrap();
