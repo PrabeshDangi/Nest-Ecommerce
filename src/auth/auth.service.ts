@@ -73,6 +73,20 @@ export class AuthService {
         })
     }
 
+    async SignoutUser(res:Response){
+    try {
+        res.clearCookie('token');
+       return res.status(200).json({
+            message:"User logged out successfully!!"
+        })
+    } catch (error) {
+        return res.status(400).json({
+            message:"Internal server error."
+        })
+    }
+
+    }
+
     async hashPassword(password:string){
         const saltRound=10;
         return await bcrypt.hash(password,saltRound)

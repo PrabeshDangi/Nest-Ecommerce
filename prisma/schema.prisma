@@ -14,28 +14,42 @@ datasource db {
 }
 
 model User {
-  id        Int       @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   name      String
-  email     String    @unique
+  email     String   @unique
   password  String
-  phone     String    @unique
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  products  Product[]
+  phone     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  cart      Cart[]
 
   @@index([email])
   @@index([phone])
 }
 
 model Product {
-  id         Int        @id @default(autoincrement())
-  name       String
-  price      Float
-  picture    String
-  categories Category[] @relation("ProductCategories")
-  userId     Int
-  user       User       @relation(fields: [userId], references: [id])
-  tags       Tag[]      @relation("ProductTags")
+  id            Int        @id @default(autoincrement())
+  title         String
+  price         Float
+  image         String[]
+  discounttag   Boolean?
+  rating        Float
+  discountprice Float?
+  sizes         Size?
+  returnpolicy  String
+  description   String
+  brand         String
+  availability  Boolean
+  categories    Category[] @relation("ProductCategories")
+  Cart          Cart[]
+}
+
+enum Size {
+  sm
+  m
+  l
+  xl
+  xxl
 }
 
 model Category {
@@ -44,8 +58,10 @@ model Category {
   products Product[] @relation("ProductCategories")
 }
 
-model Tag {
-  id       Int       @id @default(autoincrement())
-  name     String    @unique
-  products Product[] @relation("ProductTags")
+model Cart {
+  id        Int     @id @default(autoincrement())
+  userId    Int
+  user      User    @relation(fields: [userId], references: [id])
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
 }

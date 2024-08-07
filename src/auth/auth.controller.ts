@@ -20,4 +20,9 @@ export class AuthController {
   SigninUser(@Body() signindto:LoginDto,@Res() res){
     return this.authService.SigninUser(signindto,res)
   }
+
+  @Post('signout')
+  SignoutUser(@Res() res){
+    return this.authService.SignoutUser(res)
+  }
 }

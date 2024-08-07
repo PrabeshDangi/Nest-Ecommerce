@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
+import { ProfileModule } from './profile/profile.module';
 import config from './config/config';
 
 
@@ -11,7 +12,7 @@ import config from './config/config';
     cache:true,
     load:[config]
 
-  }), DatabaseModule],
+  }), DatabaseModule, ProfileModule],
   controllers: [],
   providers: [],
 })
