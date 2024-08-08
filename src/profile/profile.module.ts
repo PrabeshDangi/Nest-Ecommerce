@@ -4,6 +4,7 @@ import { ProfileController } from './profile.controller';
 import { DatabaseModule } from 'src/database/database.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { JwtStrategy } from 'src/auth/Guard/Jwt.strategy';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
   imports:[AuthModule,DatabaseModule],

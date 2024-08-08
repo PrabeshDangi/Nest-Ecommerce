@@ -7,6 +7,7 @@ import { LoginDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
 import { Response } from 'express';
 import { cookieOptions } from 'src/constant';
+import { UserRole } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -33,7 +34,7 @@ export class AuthService {
                 email,
                 password:hashedpassword,
                 phone,
-                role:signupdto.role||"user",
+                role: signupdto.role || "user",
             }
         })
 

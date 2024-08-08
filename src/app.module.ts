@@ -1,19 +1,31 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from './auth/auth.module';
-import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
 import { ProfileModule } from './profile/profile.module';
 import config from './config/config';
+import { ConfigModule } from '@nestjs/config';
+import { CartModule } from './cart/cart.module';
+import { APP_GUARD } from '@nestjs/core';
+import { RolesGuard } from './auth/Guard/role.guard';
 
 
 @Module({
-  imports: [AuthModule,ConfigModule.forRoot({
+  imports: [
+  AuthModule,
+  ConfigModule.forRoot({
     isGlobal:true,
     cache:true,
     load:[config]
-
-  }), DatabaseModule, ProfileModule],
+    }),
+  DatabaseModule,
+  ProfileModule,
+  CartModule
+],
   controllers: [],
-  providers: [],
+  providers: [ {
+    provide: APP_GUARD,
+    useClass: RolesGuard,
+  },],
 })
 export class AppModule {}
+
