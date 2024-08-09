@@ -1,4 +1,5 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { UserRole } from '@prisma/client';
 import { Request, Response } from 'express';
 import { DatabaseService } from 'src/database/database.service';
 
@@ -8,7 +9,7 @@ export class CartService {
     constructor(private prisma:DatabaseService){}
 
     async getMyCart(req: Request, res: Response){
-        const user=req.user as { id: number; email: string };
+        const user=req.user as { id: number; email: string};
 
         if(!user){
             throw new ForbiddenException("User not authorized!!")
