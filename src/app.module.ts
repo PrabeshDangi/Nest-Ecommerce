@@ -8,6 +8,7 @@ import { CartModule } from './cart/cart.module';
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './auth/Guard/role.guard';
 import { JwtGuard } from './auth/Guard/Jwt.guard';
+import { ProductModule } from './product/product.module';
 
 
 @Module({
@@ -20,7 +21,8 @@ import { JwtGuard } from './auth/Guard/Jwt.guard';
     }),
   DatabaseModule,
   ProfileModule,
-  CartModule
+  CartModule,
+  ProductModule
 ],
   controllers: [],
   providers: [ ],

@@ -9,7 +9,6 @@ import { DatabaseService } from "src/database/database.service";
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
     constructor(
-      private configService: ConfigService,
       private prisma:DatabaseService
     ) {
   
