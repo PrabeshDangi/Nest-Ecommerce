@@ -1,12 +1,11 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { UserRole } from '@prisma/client';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { DatabaseService } from 'src/database/database.service';
+import { PrismaService } from 'src/global/prisma/prisma.service';
 
 
 @Injectable()
 export class CartService {
-    constructor(private prisma:DatabaseService){}
+    constructor(private prisma:PrismaService){}
 
     async getMyCart(req: Request, res: Response){
         const user=req.user as { id: number; email: string};
@@ -14,12 +13,6 @@ export class CartService {
         if(!user){
             throw new ForbiddenException("User not authorized!!")
         }
-
-        const userAvailable=await this.prisma.user.findUnique({
-            where:{
-                id:user.id
-            }
-        })
 
         const userWithCart=await this.prisma.user.findUnique({
             where:{
@@ -51,6 +44,16 @@ export class CartService {
 
         if(!user){
             throw new ForbiddenException("User not authorized!!");
+        }
+
+        const item=await this.prisma.cart.findUnique({
+            where:{
+                id:id
+            }
+        })
+
+        if(!item){
+            throw new BadRequestException("Cart not found!!")
         }
 
         const deletedCartItem = await this.prisma.cart.deleteMany({

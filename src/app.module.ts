@@ -1,16 +1,14 @@
 import { Module } from '@nestjs/common';
-import { AuthModule } from './auth/auth.module';
-import { DatabaseModule } from './database/database.module';
-import { ProfileModule } from './profile/profile.module';
-import config from './config/config';
 import { ConfigModule } from '@nestjs/config';
-import { CartModule } from './cart/cart.module';
-import { APP_GUARD } from '@nestjs/core';
-import { RolesGuard } from './auth/Guard/role.guard';
-import { JwtGuard } from './auth/Guard/Jwt.guard';
-import { ProductModule } from './product/product.module';
+import { AuthModule } from './api/auth/auth.module';
+import { CartModule } from './api/cart/cart.module';
+import { ProductModule } from './api/product/product.module';
+import { ProfileModule } from './api/profile/profile.module';
+import config from './common/config/config';
+import { PrismaModule } from './global/prisma/prisma.module';
+import { WishlistModule } from './api/wishlist/wishlist.module';
 
-
+// global
 @Module({
   imports: [
   AuthModule,
@@ -19,10 +17,11 @@ import { ProductModule } from './product/product.module';
     cache:true,
     load:[config]
     }),
-  DatabaseModule,
+  PrismaModule,
   ProfileModule,
   CartModule,
-  ProductModule
+  ProductModule,
+  WishlistModule
 ],
   controllers: [],
   providers: [ ],

@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { ProfileService } from './profile.service';
-import { JwtGuard } from 'src/auth/Guard/Jwt.guard';
+import { JwtGuard } from 'src/api/auth/Guard/Jwt.guard';
 import { updateDto } from './dto/updateProfile.dto';
 import { changePasswordDto } from './dto/changePassword.dto';
 

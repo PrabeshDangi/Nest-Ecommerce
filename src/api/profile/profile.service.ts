@@ -1,13 +1,13 @@
 import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { DatabaseService } from 'src/database/database.service';
 import { updateDto } from './dto/updateProfile.dto';
 import { changePasswordDto } from './dto/changePassword.dto';
 import * as bcrypt from 'bcrypt'
+import { PrismaService } from 'src/global/prisma/prisma.service';
 
 @Injectable()
 export class ProfileService {
-    constructor(private prisma:DatabaseService){}
+    constructor(private prisma:PrismaService){}
 
     async getMyProfile(req:Request,res:Response){
         const user=req.user as { id: number; email: string };

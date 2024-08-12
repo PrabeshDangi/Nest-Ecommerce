@@ -1,13 +1,44 @@
-import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProductDto } from './dto/createproduct.dto';
 import { Request, Response } from 'express';
-import { DatabaseService } from 'src/database/database.service';
 import { Size } from '@prisma/client';
 import { UpdateProductDto } from './dto/updateproduct.dto';
+import { PrismaService } from 'src/global/prisma/prisma.service';
 
 @Injectable()
 export class ProductService {
-    constructor(  private prisma:DatabaseService){}
+    constructor(  private prisma:PrismaService){}
+
+    async getAllProducts(res:Response){
+        const products=await this.prisma.product.findMany();
+
+        if(products.length===0){
+            throw new NotFoundException("No products found!!");
+        }
+
+        return res.status(200).json({
+            message:"Products fetched successfully!!",
+            count:products.length,
+            data:products
+        })
+    }
+
+    async getProduct(id:number,res:Response){
+        const product=await this.prisma.product.findUnique({
+            where:{
+                id
+            }
+        })
+
+        if(!product){
+            throw new NotFoundException("Product not found!!")
+        }
+
+        return res.status(200).json({
+            message:"Product fetched successfully!!",
+            data:product
+        })
+    }
 
     async addProduct(createproductdto: CreateProductDto, req: Request, res: Response){
         const user=req.user as {id:number,email:string};
@@ -70,4 +101,33 @@ export class ProductService {
             data: updatedProduct,
         });
     }
+
+    async deleteProduct(id:number,req:Request,res:Response){
+        const user=req.user;
+
+        if(!user){
+            throw new ForbiddenException("User not authorized!!");
+        }
+
+        const product=await this.prisma.product.findUnique({
+            where:{
+                id:id
+            }
+        })
+
+        if(!product){
+            throw new NotFoundException("Prouct not found!!")
+        }
+
+        await this.prisma.product.delete({
+            where:{
+                id
+            }
+        })
+
+        return res.status(200).json({
+            message:"Product deleted successfully!!"
+        })
+    }
+    
 }

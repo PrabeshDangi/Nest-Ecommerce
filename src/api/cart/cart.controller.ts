@@ -1,9 +1,9 @@
 import { Controller, Get, Param, ParseIntPipe, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { CartService } from './cart.service';
-import { JwtGuard } from 'src/auth/Guard/Jwt.guard';
-import { Roles } from 'src/decorators/roles.decorators';
-import { Role } from 'src/enums/role.enum';
-import { RolesGuard } from 'src/auth/Guard/role.guard';
+import { JwtGuard } from 'src/api/auth/Guard/Jwt.guard';
+import { RolesGuard } from 'src/api/auth/Guard/role.guard';
+import { Role } from 'src/common/enums/role.enum';
+import { Roles } from 'src/common/decorator/roles.decorators';
 
 
  //@Roles(['admin','user'])
