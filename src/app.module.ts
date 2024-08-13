@@ -7,6 +7,8 @@ import { ProfileModule } from './api/profile/profile.module';
 import config from './common/config/config';
 import { PrismaModule } from './global/prisma/prisma.module';
 import { WishlistModule } from './api/wishlist/wishlist.module';
+import { FlashsaleModule } from './api/flashsale/flashsale.module';
+import { SaleScheduler } from './global/services/scheduler.service';
 
 // global
 @Module({
@@ -21,10 +23,11 @@ import { WishlistModule } from './api/wishlist/wishlist.module';
   ProfileModule,
   CartModule,
   ProductModule,
-  WishlistModule
+  WishlistModule,
+  FlashsaleModule
 ],
   controllers: [],
-  providers: [ ],
+  providers: [ SaleScheduler],
 })
 export class AppModule {}
 

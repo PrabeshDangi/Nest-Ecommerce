@@ -1,13 +1,41 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProductDto } from './dto/createproduct.dto';
 import { Request, Response } from 'express';
-import { Size } from '@prisma/client';
+import { Prisma, Product, Size } from '@prisma/client';
 import { UpdateProductDto } from './dto/updateproduct.dto';
 import { PrismaService } from 'src/global/prisma/prisma.service';
 
 @Injectable()
 export class ProductService {
     constructor(  private prisma:PrismaService){}
+     
+
+    async searchProduct(sstring:string){
+        const query = sstring.split(' ').map(term => `${term}:*`).join(' & ');
+
+
+        const results = await this.prisma.$queryRaw<Product[]>`
+        SELECT * FROM "Product" 
+        WHERE to_tsvector('english', "title") 
+        @@ to_tsquery('english', ${query}::text)
+    `;
+
+
+        return {
+            results
+        };
+    }
+
+    async getNewArrival(){
+        const newItem=await this.prisma.product.findMany({
+            orderBy: {
+                createdAt: 'desc',
+            },
+            take: 10, 
+        })
+
+        return newItem
+    }
 
     async getAllProducts(res:Response){
         const products=await this.prisma.product.findMany();

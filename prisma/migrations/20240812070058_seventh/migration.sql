@@ -6,3 +6,7 @@
 */
 -- CreateIndex
 CREATE UNIQUE INDEX "Wishlist_userId_productId_key" ON "Wishlist"("userId", "productId");
+
+CREATE INDEX "user_fulltext_idx" ON "User" USING GIN (
+  to_tsvector('english', "name")
+);

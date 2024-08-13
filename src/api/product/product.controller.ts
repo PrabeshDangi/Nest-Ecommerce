@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/createproduct.dto';
 import { JwtGuard } from 'src/api/auth/Guard/Jwt.guard';
@@ -17,6 +17,18 @@ export class ProductController {
     private readonly productService: ProductService,
   
   ) {}
+
+  @Public()
+  @Get('searchitem')
+  searchProduct(@Query('q') sstring:string){
+    return this.productService.searchProduct(sstring);
+  }
+
+  @Public()
+  @Get('newarrival')
+  getNewArrival(){
+    return this.productService.getNewArrival();
+  }
 
   @Public()
   @Get('allproducts')

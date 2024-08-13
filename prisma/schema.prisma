@@ -6,7 +6,7 @@
 
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["fullTextSearch"]
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
 }
 
 datasource db {
@@ -58,6 +58,11 @@ model Product {
   availability  Boolean
   categories    Category[] @relation("ProductCategories")
   Cart          Cart[]
+  onSale        Boolean    @default(false)
+  saleStart     DateTime?
+  saleEnd       DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 
   Wishlist Wishlist[]
 }
@@ -84,4 +89,15 @@ model Wishlist {
   product   Product @relation(fields: [productId], references: [id])
 
   @@unique([userId, productId])
+}
+
+model FlashSaleProduct {
+  id             Int      @id @default(autoincrement())
+  productId      Int
+  discount       Float
+  startTime      DateTime
+  endTime        DateTime
+  inventoryCount Int
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
