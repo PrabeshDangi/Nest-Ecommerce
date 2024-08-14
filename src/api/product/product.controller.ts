@@ -9,6 +9,7 @@ import {
   Req,
   Res,
   UploadedFile,
+  UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -21,7 +22,7 @@ import { Role } from 'src/common/enums/role.enum';
 import { UpdateProductDto } from './dto/updateproduct.dto';
 import { Roles } from 'src/common/decorator/roles.decorators';
 import { Public } from 'src/common/decorator/public.decorator';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 
 @UseGuards(JwtGuard, RolesGuard)
 @Roles(Role.Admin)
@@ -54,14 +55,14 @@ export class ProductController {
   }
 
   @Post('addproduct')
-  @UseInterceptors(FileInterceptor('image'))
+  @UseInterceptors(FilesInterceptor('image'))
   addProduct(
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFiles() files: Express.Multer.File[],
     @Body() createproductdto: CreateProductDto,
     @Req() req,
     @Res() res,
   ) {
-    return this.productService.addProduct(file, createproductdto, req, res);
+    return this.productService.addProduct(files, createproductdto, req, res);
   }
 
   @Post('updateproduct/:id')

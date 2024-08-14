@@ -78,7 +78,7 @@ export class ProductService {
   }
 
   async addProduct(
-    file: Express.Multer.File,
+    files: Express.Multer.File[],
     createproductdto: CreateProductDto,
     req: Request,
     res: Response,
@@ -89,14 +89,25 @@ export class ProductService {
     if (!user) {
       throw new ForbiddenException('User not authorized!!');
     }
+    console.log(files);
 
-    if (!file) {
-      throw new BadRequestException('Image file is required');
+    if (!files || files.length === 0) {
+      throw new BadRequestException('At least one image file is required');
     }
+    //For the single image
+    //const imageUrl = await this.uploadImage.uploadImage(file);
 
-    const imageUrl = await this.uploadImage.uploadImage(file);
+    const imageUrls = await Promise.all(
+      files.map(async (file) => {
+        const imageUrl = await this.uploadImage.uploadImage(file);
+        if (!imageUrl) {
+          throw new BadRequestException('Image uploading error!!');
+        }
+        return imageUrl;
+      }),
+    );
 
-    if (!imageUrl) {
+    if (!imageUrls) {
       throw new BadRequestException('Image uploading error!!');
     }
 
@@ -110,7 +121,7 @@ export class ProductService {
       data: {
         title: createproductdto.title,
         price: parseFloat(createproductdto.price as unknown as string),
-        image: [imageUrl],
+        image: imageUrls,
         discountprice: parseFloat(
           createproductdto.discountprice as unknown as string,
         ),
