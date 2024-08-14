@@ -7,7 +7,7 @@ import { PrismaService } from '../prisma/prisma.service';
 export class SaleScheduler {
   constructor(private readonly prisma: PrismaService) {}
 
-  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  @Cron(CronExpression.EVERY_10_SECONDS)
   async handleExpiredSales() {
     const now = new Date();
 

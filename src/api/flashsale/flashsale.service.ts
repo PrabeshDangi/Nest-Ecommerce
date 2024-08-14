@@ -14,38 +14,25 @@ export class FlashsaleService {
   constructor(private prisma: PrismaService) {}
 
   async getAllFlashItems() {
-    const now = moment().toDate();
-    console.log('Current date and time:', now);
+    const currentDate = new Date();
 
-    const items = await this.prisma.product.findMany({
+    const onSaleItems = await this.prisma.product.findMany({
       where: {
         onSale: true,
+        saleStart: {
+          lte: currentDate, // Sale start is less than or equal to the current date
+        },
+        saleEnd: {
+          gte: currentDate, // Sale end is greater than or equal to the current date
+        },
       },
     });
 
-    // Filter items based on whether their saleEnd date is in the future
-    const onSaleItems = items.reduce(
-      (acc, curr) => {
-        const saleEndMoment = moment(curr.saleEnd);
-        const diffDays = saleEndMoment.diff(now, 'days'); // Difference in days
-
-        if (diffDays >= 0) {
-          // If saleEnd is in the future or today, add to accumulator
-          acc.push(curr);
-        }
-        return acc;
-      },
-      [] as typeof items,
-    );
-
     if (onSaleItems.length === 0) {
-      throw new NotFoundException('No items currently on flash sale!');
+      throw new NotFoundException('No items found on sale!!');
     }
 
-    return {
-      count: onSaleItems.length,
-      onSaleItems,
-    };
+    return onSaleItems;
   }
 
   async addItemToFlash(
@@ -56,6 +43,12 @@ export class FlashsaleService {
   ) {
     const { saleStart, saleEnd, discountprice } = updateflashdto;
 
+    if (saleStart < new Date()) {
+      throw new BadRequestException(
+        'sale start date should be greater than current date and time!!',
+      );
+    }
+
     if (saleEnd < saleStart) {
       throw new BadRequestException(
         'Sale start date must be smaller than the sale end date!!',
@@ -65,8 +58,6 @@ export class FlashsaleService {
     const itemAvailable = await this.prisma.product.findUnique({
       where: { id },
     });
-
-    console.log(itemAvailable);
 
     if (!itemAvailable) {
       throw new NotFoundException('Item not found!!');

@@ -1,11 +1,16 @@
-// parse 
+// parse
+
+import { supabase } from './supabase.config';
 
 export default () => ({
-    database: {
-        connectionString: process.env.DATABASE_URL
-    },
-    secret: {
-        jwtsecret: process.env.jwtsecret
-    },
-    port: process.env.PORT
-});   
+  database: {
+    connectionString: process.env.DATABASE_URL,
+  },
+  secret: {
+    jwtsecret: process.env.jwtsecret,
+  },
+  port: process.env.PORT,
+  supabase: {
+    bucketName: process.env.BUCKET_NAME,
+  },
+});

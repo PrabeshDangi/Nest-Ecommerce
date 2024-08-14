@@ -1,161 +1,199 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateProductDto } from './dto/createproduct.dto';
 import { Request, Response } from 'express';
 import { Prisma, Product, Size } from '@prisma/client';
 import { UpdateProductDto } from './dto/updateproduct.dto';
 import { PrismaService } from 'src/global/prisma/prisma.service';
+import { ImageUploadService } from 'src/global/services/imageupload.service';
 
 @Injectable()
 export class ProductService {
-    constructor(  private prisma:PrismaService){}
-     
+  constructor(
+    private prisma: PrismaService,
+    private uploadImage: ImageUploadService,
+  ) {}
 
-    async searchProduct(sstring:string){
-        const query = sstring.split(' ').map(term => `${term}:*`).join(' & ');
+  async searchProduct(sstring: string) {
+    const query = sstring
+      .split(' ')
+      .map((term) => `${term}:*`)
+      .join(' & ');
 
-
-        const results = await this.prisma.$queryRaw<Product[]>`
+    const results = await this.prisma.$queryRaw<Product[]>`
         SELECT * FROM "Product" 
         WHERE to_tsvector('english', "title") 
         @@ to_tsquery('english', ${query}::text)
     `;
 
+    return {
+      results,
+    };
+  }
 
-        return {
-            results
-        };
+  async getNewArrival() {
+    const newItem = await this.prisma.product.findMany({
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: 10,
+    });
+
+    return newItem;
+  }
+
+  async getAllProducts(res: Response) {
+    const products = await this.prisma.product.findMany();
+
+    if (products.length === 0) {
+      throw new NotFoundException('No products found!!');
     }
 
-    async getNewArrival(){
-        const newItem=await this.prisma.product.findMany({
-            orderBy: {
-                createdAt: 'desc',
-            },
-            take: 10, 
-        })
+    return res.status(200).json({
+      message: 'Products fetched successfully!!',
+      count: products.length,
+      data: products,
+    });
+  }
 
-        return newItem
+  async getProduct(id: number, res: Response) {
+    const product = await this.prisma.product.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!product) {
+      throw new NotFoundException('Product not found!!');
     }
 
-    async getAllProducts(res:Response){
-        const products=await this.prisma.product.findMany();
+    return res.status(200).json({
+      message: 'Product fetched successfully!!',
+      data: product,
+    });
+  }
 
-        if(products.length===0){
-            throw new NotFoundException("No products found!!");
-        }
+  async addProduct(
+    file: Express.Multer.File,
+    createproductdto: CreateProductDto,
+    req: Request,
+    res: Response,
+  ) {
+    console.log('add project');
+    const user = req.user as { id: number; email: string };
 
-        return res.status(200).json({
-            message:"Products fetched successfully!!",
-            count:products.length,
-            data:products
-        })
+    if (!user) {
+      throw new ForbiddenException('User not authorized!!');
     }
 
-    async getProduct(id:number,res:Response){
-        const product=await this.prisma.product.findUnique({
-            where:{
-                id
+    if (!file) {
+      throw new BadRequestException('Image file is required');
+    }
+
+    const imageUrl = await this.uploadImage.uploadImage(file);
+
+    if (!imageUrl) {
+      throw new BadRequestException('Image uploading error!!');
+    }
+
+    // console.log(createproductdto);
+    const categoryIds = createproductdto.categories
+      .split(',')
+      .map((categoryId) => parseInt(categoryId.trim()))
+      .filter((id) => !isNaN(id));
+
+    const newProduct = await this.prisma.product.create({
+      data: {
+        title: createproductdto.title,
+        price: parseFloat(createproductdto.price as unknown as string),
+        image: [imageUrl],
+        discountprice: parseFloat(
+          createproductdto.discountprice as unknown as string,
+        ),
+        rating: parseFloat(createproductdto.rating as unknown as string),
+        discounttag: createproductdto.discounttag == ('true' as unknown),
+        sizes: createproductdto.sizes as Size,
+        returnpolicy: createproductdto.returnpolicy,
+        description: createproductdto.description,
+        brand: createproductdto.brand,
+        availability: createproductdto.availability == ('true' as unknown),
+        categories: {
+          connect: categoryIds.map((id) => ({ id })),
+        },
+      },
+    });
+
+    if (!newProduct) {
+      throw new BadRequestException('Error adding the new product');
+    }
+
+    return res.status(201).json({
+      message: 'Successfully added new product!!',
+      data: newProduct,
+    });
+  }
+
+  async updateProduct(
+    id: number,
+    updateProductDto: UpdateProductDto,
+    req: Request,
+    res: Response,
+  ) {
+    const user = req.user as { id: number; email: string };
+
+    if (!user) {
+      throw new ForbiddenException('User not authorized!!');
+    }
+
+    const updatedProduct = await this.prisma.product.update({
+      where: { id },
+      data: {
+        ...updateProductDto,
+        categories: updateProductDto.categories
+          ? {
+              set: updateProductDto.categories.map((category) => ({
+                id: category.id,
+              })),
             }
-        })
+          : undefined,
+      },
+    });
 
-        if(!product){
-            throw new NotFoundException("Product not found!!")
-        }
+    return res.status(200).json({
+      message: 'Product updated successfully!',
+      data: updatedProduct,
+    });
+  }
 
-        return res.status(200).json({
-            message:"Product fetched successfully!!",
-            data:product
-        })
+  async deleteProduct(id: number, req: Request, res: Response) {
+    const user = req.user;
+
+    if (!user) {
+      throw new ForbiddenException('User not authorized!!');
     }
 
-    async addProduct(createproductdto: CreateProductDto, req: Request, res: Response){
-        const user=req.user as {id:number,email:string};
+    const product = await this.prisma.product.findUnique({
+      where: {
+        id: id,
+      },
+    });
 
-        if(!user){
-            throw new ForbiddenException("User not authorized!!");
-        }
-
-        const newProduct=await this.prisma.product.create({
-            data:{
-                title: createproductdto.title,
-                price: createproductdto.price,
-                image: createproductdto.image,
-                discountprice: createproductdto.discountprice,
-                rating: createproductdto.rating,
-                discounttag: createproductdto.discounttag,
-                sizes: createproductdto.sizes as Size, 
-                returnpolicy: createproductdto.returnpolicy,
-                description: createproductdto.description,
-                brand: createproductdto.brand,
-                availability: createproductdto.availability,
-                categories: createproductdto.categories && createproductdto.categories.length > 0 ?
-                {
-                    connect: createproductdto.categories.map(category => ({ id: category.id })),
-                }
-                : undefined,
-            }
-        })
-
-        if(!newProduct){
-            throw new BadRequestException("Error adding the new product");
-        }
-
-        return res.status(201).json({
-            message:"Successfully added new product!!",
-            data:newProduct
-        })
-        
+    if (!product) {
+      throw new NotFoundException('Prouct not found!!');
     }
 
-    async updateProduct(id: number, updateProductDto: UpdateProductDto, req: Request, res: Response) {
-        const user = req.user as { id: number, email: string };
-    
-        if (!user) {
-            throw new ForbiddenException("User not authorized!!");
-        }
-    
-        const updatedProduct = await this.prisma.product.update({
-            where: { id },
-            data: {
-                ...updateProductDto,
-                categories: updateProductDto.categories ? {
-                    set: updateProductDto.categories.map(category => ({ id: category.id })),
-                } : undefined,
-            },
-        });
-    
-        return res.status(200).json({
-            message: "Product updated successfully!",
-            data: updatedProduct,
-        });
-    }
+    await this.prisma.product.delete({
+      where: {
+        id,
+      },
+    });
 
-    async deleteProduct(id:number,req:Request,res:Response){
-        const user=req.user;
-
-        if(!user){
-            throw new ForbiddenException("User not authorized!!");
-        }
-
-        const product=await this.prisma.product.findUnique({
-            where:{
-                id:id
-            }
-        })
-
-        if(!product){
-            throw new NotFoundException("Prouct not found!!")
-        }
-
-        await this.prisma.product.delete({
-            where:{
-                id
-            }
-        })
-
-        return res.status(200).json({
-            message:"Product deleted successfully!!"
-        })
-    }
-    
+    return res.status(200).json({
+      message: 'Product deleted successfully!!',
+    });
+  }
 }
