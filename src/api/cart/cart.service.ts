@@ -58,12 +58,10 @@ export class CartService {
       throw new NotFoundException('Item not available!!');
     }
 
-    const isAlreadyInCart = await this.prisma.cart.findUnique({
+    const isAlreadyInCart = await this.prisma.cart.findFirst({
       where: {
-        userId_productId: {
-          userId: user.id,
-          productId: id,
-        },
+        userId: user.id,
+        productId: id,
       },
     });
 
