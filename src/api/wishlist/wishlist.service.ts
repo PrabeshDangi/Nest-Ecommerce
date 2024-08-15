@@ -83,6 +83,34 @@ export class WishlistService {
     });
   }
 
+  async deleteAllFromList(req: Request, res: Response) {
+    const user = req.user as { id: number; email: string };
+
+    if (!user) {
+      throw new ForbiddenException('User not authorized!!');
+    }
+
+    const listItems = await this.prisma.wishlist.findMany({
+      where: {
+        userId: user.id,
+      },
+    });
+
+    if (listItems.length === 0) {
+      throw new NotFoundException('No items on wishlist!!');
+    }
+
+    await this.prisma.wishlist.deleteMany({
+      where: {
+        userId: user.id,
+      },
+    });
+
+    return res.status(200).json({
+      message: 'All items from wishlist deleted!!',
+    });
+  }
+
   async deleteFromList(id: number, req: Request, res: Response) {
     const user = req.user as { id: number; email: string };
 

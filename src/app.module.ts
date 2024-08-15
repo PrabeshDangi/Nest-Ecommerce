@@ -11,6 +11,7 @@ import { FlashsaleModule } from './api/flashsale/flashsale.module';
 import { SaleScheduler } from './global/services/scheduler.service';
 import { CategoryModule } from './api/category/category.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { BannerModule } from './api/banner/banner.module';
 
 // global
 @Module({
@@ -29,6 +30,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     WishlistModule,
     FlashsaleModule,
     CategoryModule,
+    BannerModule,
   ],
   controllers: [],
   providers: [SaleScheduler],
