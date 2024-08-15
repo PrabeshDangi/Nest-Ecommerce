@@ -37,6 +37,10 @@ export class CartService {
 
     const mycart = userWithCart.cart.map((cartItem) => cartItem.product);
 
+    if (mycart.length === 0) {
+      throw new NotFoundException('Cart items not found!!');
+    }
+
     return res.status(200).json({
       message: 'Cart items fetched successfully!!',
       data: mycart,
