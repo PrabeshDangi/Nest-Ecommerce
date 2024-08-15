@@ -37,16 +37,16 @@ export class BannerService {
 
     const { productId } = addproddto;
     try {
-      const banner = await this.prisma.banner.findUnique({
+      const bannerAvail = await this.prisma.banner.findUnique({
         where: { id: id },
         include: { products: true },
       });
 
-      if (!banner) {
+      if (!bannerAvail) {
         return res.status(404).json({ error: 'Banner not found!' });
       }
 
-      const productExists = banner.products.some(
+      const productExists = bannerAvail.products.some(
         (product) => product.id === productId,
       );
 
@@ -56,7 +56,7 @@ export class BannerService {
           .json({ error: 'Product is already in the banner!' });
       }
 
-      if (banner.products.length >= 3) {
+      if (bannerAvail.products.length >= 3) {
         return res
           .status(400)
           .json({ error: 'Banner can only have up to 3 products!' });
@@ -81,5 +81,11 @@ export class BannerService {
         error: 'An error occurred while adding the product to the banner.',
       });
     }
+  }
+
+  async getHello(req: Request, res: Response) {
+    res.json({
+      message: 'Hello from test function!!',
+    });
   }
 }

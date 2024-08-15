@@ -39,4 +39,10 @@ export class BannerController {
     console.log('Userrrrrrrrrrr');
     return this.bannerService.addItemToBanner(id, addproddto, req, res);
   }
+
+  @Public()
+  @Get('gethello')
+  getHello(@Req() req, @Res() res) {
+    return this.bannerService.getHello(req, res);
+  }
 }
