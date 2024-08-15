@@ -63,10 +63,9 @@ model Product {
   saleEnd       DateTime?
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
-
-  Wishlist Wishlist[]
-  bannerId Int?
-  banner   Banner?    @relation("BannerProducts", fields: [bannerId], references: [id])
+  Wishlist      Wishlist[]
+  bannerId      Int?
+  banners       Banner[]   @relation("BannerProducts")
 }
 
 model Category {
