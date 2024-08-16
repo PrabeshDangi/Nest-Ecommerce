@@ -1,5 +1,6 @@
 import {
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -20,7 +21,7 @@ import { Roles } from 'src/common/decorator/roles.decorators';
 export class WishlistController {
   constructor(private readonly wishlistService: WishlistService) {}
 
-  @Get('mylist')
+  @Get()
   getMyWishlist(@Req() req, @Res() res) {
     return this.wishlistService.getMyWishlist(req, res);
   }
@@ -30,12 +31,12 @@ export class WishlistController {
     return this.wishlistService.addToList(id, req, res);
   }
 
-  @Post('deleteall')
+  @Delete('deleteall')
   deleteAllFromList(@Req() req, @Res() res) {
     return this.wishlistService.deleteAllFromList(req, res);
   }
 
-  @Post('delete/:id')
+  @Delete('/:id')
   deleteFromList(
     @Param('id', ParseIntPipe) id: number,
     @Req() req,

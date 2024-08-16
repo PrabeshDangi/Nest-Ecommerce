@@ -103,11 +103,36 @@ export class BannerService {
       throw new ForbiddenException('User not authorized!!');
     }
 
-    const productAvailable = await this.prisma.banner.findFirst({
+    const { productId } = deletedto;
+
+    const banner = await this.prisma.banner.findUnique({
       where: { id },
+      include: { products: true },
     });
-    if (!productAvailable) {
-      throw new BadRequestException('Item not found on banner!!');
+
+    if (!banner) {
+      throw new NotFoundException('Banner not found!!');
     }
+
+    const isProductInBanner = banner.products.some(
+      (product) => product.id === productId,
+    );
+
+    if (!isProductInBanner) {
+      throw new BadRequestException('Product is not available in the banner!!');
+    }
+
+    await this.prisma.banner.update({
+      where: { id },
+      data: {
+        products: {
+          disconnect: { id: productId },
+        },
+      },
+    });
+
+    return res.status(200).json({
+      message: 'Item succesfully removed from the banner!!',
+    });
   }
 }

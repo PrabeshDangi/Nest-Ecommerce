@@ -1,9 +1,11 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Query,
   Req,
@@ -31,7 +33,7 @@ export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Public()
-  @Get('searchitem')
+  @Get()
   searchProduct(@Query('q') sstring: string) {
     return this.productService.searchProduct(sstring);
   }
@@ -43,18 +45,30 @@ export class ProductController {
   }
 
   @Public()
-  @Get('allproducts')
+  @Get('category/:id')
+  getProductsByCategoryId(@Param('id', ParseIntPipe) id: number, @Res() res) {
+    return this.productService.getProductsByCategoryId(id, res);
+  }
+
+  @Public()
+  @Get('bestselling')
+  getBestSellingProducts(@Res() res) {
+    return this.productService.getBestSellingProducts(res);
+  }
+
+  @Public()
+  @Get('all')
   getAllProducts(@Res() res) {
     return this.productService.getAllProducts(res);
   }
 
   @Public()
-  @Get('productdetail/:id')
+  @Get('/:id')
   getProduct(@Param('id', ParseIntPipe) id: number, @Res() res) {
     return this.productService.getProduct(id, res);
   }
 
-  @Post('addproduct')
+  @Post('create')
   @UseInterceptors(FilesInterceptor('image'))
   addProduct(
     @UploadedFiles() files: Express.Multer.File[],
@@ -65,9 +79,10 @@ export class ProductController {
     return this.productService.addProduct(files, createproductdto, req, res);
   }
 
-  @Post('updateproduct/:id')
+  //Todo: handle update in service.
+  @Patch('/:id')
   updateProduct(
-    @Param() id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateproductdto: UpdateProductDto,
     @Req() req,
     @Res() res,
@@ -75,7 +90,7 @@ export class ProductController {
     return this.productService.updateProduct(id, updateproductdto, req, res);
   }
 
-  @Post('deleteproduct/:id')
+  @Delete('/:id')
   deleteProduct(@Param('id', ParseIntPipe) id: number, @Req() req, @Res() res) {
     return this.productService.deleteProduct(id, req, res);
   }

@@ -1,10 +1,13 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
+  Put,
   Req,
   Res,
   UseGuards,
@@ -24,17 +27,17 @@ export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
   @Public()
-  @Get('getcategories')
+  @Get()
   getCategories(@Req() req, @Res() res) {
     return this.categoryService.getCategories(req, res);
   }
 
-  @Post('addcategory')
+  @Post('add')
   addCategory(@Body() addcaetegorydto: addCategoryDto, @Req() req, @Res() res) {
     return this.categoryService.addCategory(addcaetegorydto, req, res);
   }
 
-  @Post('deletecategory/:id')
+  @Delete('/:id')
   deleteCategory(
     @Param('id', ParseIntPipe) id: number,
     @Req() req,
@@ -43,7 +46,7 @@ export class CategoryController {
     return this.categoryService.deleteCategory(id, req, res);
   }
 
-  @Post('updatecategory/:id')
+  @Patch('update/:id')
   updateCategory(
     @Param('id', ParseIntPipe) id: number,
     @Body() updatedto: addCategoryDto,

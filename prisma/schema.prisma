@@ -66,6 +66,7 @@ model Product {
   Wishlist      Wishlist[]
   bannerId      Int?
   banners       Banner[]   @relation("BannerProducts")
+  soldqunatity  Int?       @default(0)
 }
 
 model Category {

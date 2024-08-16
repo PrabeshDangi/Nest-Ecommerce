@@ -77,6 +77,59 @@ export class ProductService {
     });
   }
 
+  async getBestSellingProducts(res: Response) {
+    const products = await this.prisma.product.findMany({
+      orderBy: {
+        soldqunatity: 'desc',
+      },
+      take: 10,
+      select: {
+        title: true,
+        description: true,
+        brand: true,
+        price: true,
+        image: true,
+        rating: true,
+        availability: true,
+        soldqunatity: true,
+      },
+    });
+
+    if (products.length === 0) {
+      throw new NotFoundException('No best selling products found!!');
+    }
+
+    return res.status(200).json({
+      status: true,
+      message: 'Best selling products fetched successfully!!',
+      data: products,
+    });
+  }
+
+  async getProductsByCategoryId(id: number, res: Response) {
+    const categoryAvailable = await this.prisma.category.findUnique({
+      where: { id },
+    });
+
+    if (!categoryAvailable) {
+      throw new NotFoundException('Category not found!!');
+    }
+
+    const products = await this.prisma.category.findMany({
+      where: { id },
+      include: { products: true },
+    });
+
+    if (products.length === 0) {
+      throw new NotFoundException('Products not found on this category!!');
+    }
+
+    return res.status(200).json({
+      message: 'Products fetched successfully!!',
+      data: products,
+    });
+  }
+
   async addProduct(
     files: Express.Multer.File[],
     createproductdto: CreateProductDto,

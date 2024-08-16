@@ -1,5 +1,6 @@
 import {
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -22,17 +23,17 @@ import { Roles } from 'src/common/decorator/roles.decorators';
 export class CartController {
   constructor(private readonly cartService: CartService) {}
 
-  @Get('mycart')
+  @Get()
   getMyCart(@Res() res, @Req() req) {
     return this.cartService.getMyCart(req, res);
   }
 
-  @Post('additem/:id')
+  @Post('add/:id')
   addToCart(@Param('id', ParseIntPipe) id: number, @Req() req, @Res() res) {
     return this.cartService.addItem(id, req, res);
   }
 
-  @Post('deleteproduct/:id')
+  @Delete('delete/:id')
   deleteProductFromCart(
     @Param('id', ParseIntPipe) id: number,
     @Req() req,
@@ -41,7 +42,7 @@ export class CartController {
     return this.cartService.deleteProductFromCart(id, req, res);
   }
 
-  @Post('deleteall')
+  @Delete('deleteall')
   deleteAllItems(@Req() req, @Res() res) {
     return this.cartService.deleteAllItems(req, res);
   }

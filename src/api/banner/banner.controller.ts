@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -24,7 +25,7 @@ export class BannerController {
   constructor(private readonly bannerService: BannerService) {}
 
   @Public()
-  @Get('getitems')
+  @Get('items')
   getBannerItems(@Res() res) {
     return this.bannerService.getBannerItem(res);
   }
@@ -39,7 +40,7 @@ export class BannerController {
     return this.bannerService.addBannerItem(id, addItemdto, req, res);
   }
 
-  @Post('deleteitem/:id')
+  @Delete('delete/:id')
   deleteItem(
     @Body() deletedto: addItemDto,
     @Param('id', ParseIntPipe) id: number,
