@@ -42,4 +42,17 @@ export class ImageUploadService {
       console.log(error);
     }
   }
+
+  async deleteImage(publicId: string) {
+    const { data, error } = await supabase.storage
+      .from(process.env.BUCKET_NAME)
+      .remove([publicId]);
+    if (!error) {
+      return {
+        message: 'Resource deleted successfully!!',
+      };
+    } else {
+      console.log('Error', error);
+    }
+  }
 }

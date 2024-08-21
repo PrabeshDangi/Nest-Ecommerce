@@ -10,12 +10,15 @@ import { Prisma, Product, Size } from '@prisma/client';
 import { UpdateProductDto } from './dto/updateproduct.dto';
 import { PrismaService } from 'src/global/prisma/prisma.service';
 import { ImageUploadService } from 'src/global/services/imageupload.service';
+import { HelperService } from 'src/common/helper/helper.service';
+import { supabase } from 'src/common/config/supabase.config';
 
 @Injectable()
 export class ProductService {
   constructor(
     private prisma: PrismaService,
-    private uploadImage: ImageUploadService,
+    private ImageService: ImageUploadService,
+    private HelperService: HelperService,
   ) {}
 
   async searchProduct(sstring: string) {
@@ -155,7 +158,7 @@ export class ProductService {
 
     const imageUrls = await Promise.all(
       files.map(async (file) => {
-        const imageUrl = await this.uploadImage.uploadImage(file);
+        const imageUrl = await this.ImageService.uploadImage(file);
         if (!imageUrl) {
           throw new BadRequestException('Image uploading error!!');
         }
@@ -288,7 +291,7 @@ export class ProductService {
 
     const imageUrls = await Promise.all(
       files.map(async (file) => {
-        const imageUrl = await this.uploadImage.uploadImage(file);
+        const imageUrl = await this.ImageService.uploadImage(file);
         if (!imageUrl) {
           throw new BadRequestException('Image uploading error!!');
         }
@@ -333,7 +336,7 @@ export class ProductService {
 
     const imageUrls = await Promise.all(
       files.map(async (file) => {
-        const imageUrl = await this.uploadImage.uploadImage(file);
+        const imageUrl = await this.ImageService.uploadImage(file);
         if (!imageUrl) {
           throw new BadRequestException('Image uploading error!!');
         }
@@ -411,6 +414,59 @@ export class ProductService {
 
     return res.status(200).json({
       data: updatedProduct,
+    });
+  }
+
+  async deleteImage(body: { url: string }, id: number, res: Response) {
+    const { url } = body;
+
+    if (!url) {
+      throw new BadRequestException('Url required!!');
+    }
+
+    const currentItem = await this.prisma.product.findUnique({
+      where: { id },
+      select: { id: true, image: true },
+    });
+
+    if (!currentItem.image.includes(url)) {
+      return res.status(400).json({
+        status: false,
+        message: 'Invalid URL !!!',
+      });
+    }
+
+    const publicId = await this.HelperService.extractPublicId(url);
+
+    //console.log(publicId);
+
+    const imageRemaining = currentItem.image.filter(
+      (ImageUrl) => ImageUrl !== url,
+    );
+
+    const updatedProduct = await this.prisma.product.update({
+      where: { id: currentItem.id },
+      data: {
+        image: imageRemaining,
+      },
+    });
+
+    if (!updatedProduct) {
+      throw new BadRequestException(
+        'Error updateing the image of the given product!!',
+      );
+    }
+
+    const deletedImage = await this.ImageService.deleteImage(publicId);
+
+    if (!deletedImage) {
+      return res.status(400).json({
+        message: 'Error deletion of the image!!',
+      });
+    }
+
+    return res.status(200).json({
+      message: 'Image deleted successfully!!',
     });
   }
 }

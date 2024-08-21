@@ -116,8 +116,17 @@ export class ProductController {
     return this.productService.addProductImage(id, files, req, res);
   }
 
-  @Delete('deleteimage/:id')
+  @Delete('deleteimages/:id')
   deleteImages(@Param('id', ParseIntPipe) id: number, @Req() req, @Res() res) {
     return this.productService.deleteImages(id, req, res);
+  }
+
+  @Delete('deleteimage/:id')
+  deleteImage(
+    @Body() body: { url: string },
+    @Param('id', ParseIntPipe) id: number,
+    @Res() res,
+  ) {
+    return this.productService.deleteImage(body, id, res);
   }
 }
