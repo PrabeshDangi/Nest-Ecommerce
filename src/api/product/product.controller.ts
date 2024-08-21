@@ -79,7 +79,6 @@ export class ProductController {
     return this.productService.addProduct(files, createproductdto, req, res);
   }
 
-  //Todo: handle update in service.
   @Patch('/:id')
   updateProduct(
     @Param('id', ParseIntPipe) id: number,
@@ -94,4 +93,11 @@ export class ProductController {
   deleteProduct(@Param('id', ParseIntPipe) id: number, @Req() req, @Res() res) {
     return this.productService.deleteProduct(id, req, res);
   }
+
+  @Patch('/updateimage/:id')
+  @UseInterceptors(FilesInterceptor('image'))
+  updateProductImage(
+    @Param('id', ParseIntPipe) id: number,
+    @UploadedFiles() files: Express.Multer.File[],
+  ) {}
 }

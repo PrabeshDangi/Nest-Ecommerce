@@ -1,6 +1,5 @@
 import { Size } from '@prisma/client';
 import { IsOptional, IsEnum } from 'class-validator';
-import { CategoryDto } from './createproduct.dto';
 
 export class UpdateProductDto {
   @IsOptional()
@@ -8,9 +7,6 @@ export class UpdateProductDto {
 
   @IsOptional()
   price?: number;
-
-  @IsOptional()
-  image?: string[];
 
   @IsOptional()
   discounttag?: boolean;
@@ -38,5 +34,5 @@ export class UpdateProductDto {
   availability?: boolean;
 
   @IsOptional()
-  categories?: CategoryDto[];
+  categories?: string;
 }

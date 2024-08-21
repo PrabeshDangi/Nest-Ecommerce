@@ -109,24 +109,27 @@ export class ProductService {
   async getProductsByCategoryId(id: number, res: Response) {
     const categoryAvailable = await this.prisma.category.findUnique({
       where: { id },
+      include: { products: true },
     });
 
     if (!categoryAvailable) {
       throw new NotFoundException('Category not found!!');
     }
 
-    const products = await this.prisma.category.findMany({
-      where: { id },
-      include: { products: true },
-    });
+    const response = {
+      id: categoryAvailable.id,
+      name: categoryAvailable.name,
+      products: categoryAvailable.products,
+    };
 
-    if (products.length === 0) {
-      throw new NotFoundException('Products not found on this category!!');
+    if (response.products.length === 0) {
+      return res.status(404).json({
+        message: 'No items found for the given category!!',
+      });
     }
-
     return res.status(200).json({
       message: 'Products fetched successfully!!',
-      data: products,
+      data: response,
     });
   }
 
@@ -203,7 +206,7 @@ export class ProductService {
 
   async updateProduct(
     id: number,
-    updateProductDto: UpdateProductDto,
+    updateproductdto: UpdateProductDto,
     req: Request,
     res: Response,
   ) {
@@ -212,19 +215,25 @@ export class ProductService {
     if (!user) {
       throw new ForbiddenException('User not authorized!!');
     }
+    const categoryIds = updateproductdto.categories
+      ?.split(',')
+      ?.map((categoryId) => parseInt(categoryId.trim()))
+      ?.filter((id) => !isNaN(id));
+
+    const updateData: any = {
+      ...updateproductdto,
+    };
+
+    // Only connect categories if they are provided
+    if (categoryIds && categoryIds.length > 0) {
+      updateData.categories = {
+        connect: categoryIds.map((id) => ({ id })),
+      };
+    }
 
     const updatedProduct = await this.prisma.product.update({
       where: { id },
-      data: {
-        ...updateProductDto,
-        categories: updateProductDto.categories
-          ? {
-              set: updateProductDto.categories.map((category) => ({
-                id: category.id,
-              })),
-            }
-          : undefined,
-      },
+      data: updateData,
     });
 
     return res.status(200).json({
@@ -259,5 +268,18 @@ export class ProductService {
     return res.status(200).json({
       message: 'Product deleted successfully!!',
     });
+  }
+
+  //TODO: update handling
+  async updateProductImage(
+    id: number,
+    files: Express.Multer.File[],
+    req: Request,
+  ) {
+    const user = req.user as { id: number; email: string };
+
+    if (!user) {
+      throw new ForbiddenException('User not authorized!!');
+    }
   }
 }

@@ -1,24 +1,20 @@
 import {
   IsString,
   IsNumber,
-  IsArray,
-  IsBoolean,
   IsOptional,
   IsEnum,
   IsNotEmpty,
-  ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { Size } from '@prisma/client';
 
-export class CategoryDto {
-  @IsNumber()
-  id: number;
+// export class CategoryDto {
+//   @IsNumber()
+//   id: number;
 
-  @IsOptional()
-  @IsString()
-  name?: string; // Optional if you are using ids for connecting existing categories
-}
+//   @IsOptional()
+//   name?: string; // Optional if we are using ids for connecting existing categories
+// }
 
 export class CreateProductDto {
   @IsString()
@@ -41,7 +37,7 @@ export class CreateProductDto {
 
   @IsOptional()
   @IsEnum(Size)
-  sizes?: string; // If Size is an enum, use @IsEnum(Size) instead
+  sizes?: string;
 
   @IsString()
   returnpolicy: string;
