@@ -94,10 +94,30 @@ export class ProductController {
     return this.productService.deleteProduct(id, req, res);
   }
 
-  @Patch('/updateimage/:id')
+  @Patch('updateimage/:id')
   @UseInterceptors(FilesInterceptor('image'))
   updateProductImage(
     @Param('id', ParseIntPipe) id: number,
     @UploadedFiles() files: Express.Multer.File[],
-  ) {}
+    @Req() req,
+    @Res() res,
+  ) {
+    return this.productService.updateProductImage(id, files, req, res);
+  }
+
+  @Patch('addimage/:id')
+  @UseInterceptors(FilesInterceptor('image'))
+  addProductImage(
+    @Param('id', ParseIntPipe) id: number,
+    @UploadedFiles() files: Express.Multer.File[],
+    @Req() req,
+    @Res() res,
+  ) {
+    return this.productService.addProductImage(id, files, req, res);
+  }
+
+  @Delete('deleteimage/:id')
+  deleteImages(@Param('id', ParseIntPipe) id: number, @Req() req, @Res() res) {
+    return this.productService.deleteImages(id, req, res);
+  }
 }

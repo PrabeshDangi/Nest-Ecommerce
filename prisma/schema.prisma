@@ -44,29 +44,30 @@ model User {
 }
 
 model Product {
-  id            Int        @id @default(autoincrement())
-  title         String
-  price         Float
-  image         String[]
-  discounttag   Boolean?
-  rating        Float
-  discountprice Float?
-  sizes         Size?
-  returnpolicy  String
-  description   String
-  brand         String
-  availability  Boolean
-  categories    Category[] @relation("ProductCategories")
-  Cart          Cart[]
-  onSale        Boolean    @default(false)
-  saleStart     DateTime?
-  saleEnd       DateTime?
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-  Wishlist      Wishlist[]
-  bannerId      Int?
-  banners       Banner[]   @relation("BannerProducts")
-  soldqunatity  Int?       @default(0)
+  id                Int        @id @default(autoincrement())
+  title             String
+  price             Float
+  image             String[]
+  discounttag       Boolean?
+  rating            Float
+  discountprice     Float?
+  sizes             Size?
+  returnpolicy      String
+  description       String
+  brand             String
+  availability      Boolean
+  categories        Category[] @relation("ProductCategories")
+  Cart              Cart[]
+  onSale            Boolean    @default(false)
+  saleStart         DateTime?
+  saleEnd           DateTime?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  Wishlist          Wishlist[]
+  bannerId          Int?
+  banners           Banner[]   @relation("BannerProducts")
+  availablequantity Int        @default(1)
+  soldqunatity      Int?       @default(0)
 }
 
 model Category {
@@ -81,6 +82,7 @@ model Cart {
   user      User    @relation(fields: [userId], references: [id])
   productId Int
   product   Product @relation(fields: [productId], references: [id])
+  quantity  Int     @default(1)
 
   @@unique([userId, productId])
 }

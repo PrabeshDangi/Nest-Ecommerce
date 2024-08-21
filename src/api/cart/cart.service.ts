@@ -22,10 +22,11 @@ export class CartService {
       where: {
         id: user.id,
       },
-      include: {
+      select: {
         cart: {
-          include: {
+          select: {
             product: true,
+            quantity: true,
           },
         },
       },
@@ -35,15 +36,9 @@ export class CartService {
       throw new ForbiddenException('User not found!!');
     }
 
-    const mycart = userWithCart.cart.map((cartItem) => cartItem.product);
-
-    if (mycart.length === 0) {
-      throw new NotFoundException('Cart items not found!!');
-    }
-
     return res.status(200).json({
       message: 'Cart items fetched successfully!!',
-      data: mycart,
+      data: userWithCart.cart,
     });
   }
 
@@ -56,10 +51,13 @@ export class CartService {
 
     const itemAvailable = await this.prisma.product.findUnique({
       where: { id },
+      select: {
+        availablequantity: true,
+      },
     });
 
     if (!itemAvailable) {
-      throw new NotFoundException('Item not available!!');
+      throw new NotFoundException('Item not available at the momemet!!');
     }
 
     const isAlreadyInCart = await this.prisma.cart.findFirst({
@@ -70,15 +68,30 @@ export class CartService {
     });
 
     if (isAlreadyInCart) {
-      throw new BadRequestException('Item already on the cart!!');
-    }
+      const currentQuantity = isAlreadyInCart.quantity;
 
-    await this.prisma.cart.create({
-      data: {
-        userId: user.id,
-        productId: id,
-      },
-    });
+      if (currentQuantity + 1 > itemAvailable.availablequantity) {
+        return res.status(400).json({
+          message: 'Cannot add more items than available quantity!',
+        });
+      }
+
+      await this.prisma.cart.update({
+        where: {
+          id: isAlreadyInCart.id,
+        },
+        data: {
+          quantity: { increment: 1 },
+        },
+      });
+    } else {
+      await this.prisma.cart.create({
+        data: {
+          userId: user.id,
+          productId: id,
+        },
+      });
+    }
 
     return res.status(201).json({
       message: 'Item added to cart!!',

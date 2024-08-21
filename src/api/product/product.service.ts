@@ -270,16 +270,147 @@ export class ProductService {
     });
   }
 
-  //TODO: update handling
   async updateProductImage(
     id: number,
     files: Express.Multer.File[],
     req: Request,
+    res: Response,
   ) {
     const user = req.user as { id: number; email: string };
 
     if (!user) {
       throw new ForbiddenException('User not authorized!!');
     }
+
+    if (!files || files.length === 0) {
+      throw new BadRequestException('At least one image file is required');
+    }
+
+    const imageUrls = await Promise.all(
+      files.map(async (file) => {
+        const imageUrl = await this.uploadImage.uploadImage(file);
+        if (!imageUrl) {
+          throw new BadRequestException('Image uploading error!!');
+        }
+        return imageUrl;
+      }),
+    );
+
+    if (!imageUrls) {
+      throw new BadRequestException('Image uploading failed!!');
+    }
+
+    const updatedImage = await this.prisma.product.update({
+      where: {
+        id,
+      },
+      data: {
+        image: imageUrls,
+      },
+    });
+    return res.status(200).json({
+      status: true,
+      message: 'Image updted successfully!!',
+      data: updatedImage,
+    });
+  }
+
+  async addProductImage(
+    id: number,
+    files: Express.Multer.File[],
+    req: Request,
+    res: Response,
+  ) {
+    const user = req.user as { id: number; email: string };
+
+    if (!user) {
+      throw new ForbiddenException('User not authorized!!');
+    }
+
+    if (!files || files.length === 0) {
+      throw new BadRequestException('At least one image file is required');
+    }
+
+    const imageUrls = await Promise.all(
+      files.map(async (file) => {
+        const imageUrl = await this.uploadImage.uploadImage(file);
+        if (!imageUrl) {
+          throw new BadRequestException('Image uploading error!!');
+        }
+        return imageUrl;
+      }),
+    );
+
+    if (!imageUrls) {
+      throw new BadRequestException('Image uploading failed!!');
+    }
+
+    const currentProduct = await this.prisma.product.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        image: true,
+      },
+    });
+
+    if (!currentProduct) {
+      throw new NotFoundException('Product not found!!');
+    }
+
+    const existingImages = currentProduct.image || [];
+    //If imageurl single chha vane array ma wrap garne else leave as it is.
+    const updatedImages = [
+      ...existingImages,
+      ...(Array.isArray(imageUrls) ? imageUrls : [imageUrls]),
+    ];
+
+    const updatedProduct = await this.prisma.product.update({
+      where: {
+        id,
+      },
+      data: {
+        image: updatedImages,
+      },
+    });
+
+    return res.status(200).json({
+      message: 'Image added successfully!!',
+      data: updatedProduct,
+    });
+  }
+
+  async deleteImages(id: number, req: Request, res: Response) {
+    const user = req.user as { id: number; email: string };
+
+    if (!user) {
+      throw new ForbiddenException('User not authoized!!');
+    }
+
+    const currentProduct = await this.prisma.product.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        image: true,
+      },
+    });
+
+    if (!currentProduct) {
+      throw new NotFoundException('Product of given id not found!!');
+    }
+
+    // currentProduct.image =undefined;
+
+    const updatedProduct = await this.prisma.product.update({
+      where: { id },
+      data: {
+        image: [],
+      },
+    });
+
+    return res.status(200).json({
+      data: updatedProduct,
+    });
   }
 }
