@@ -105,14 +105,15 @@ export class CartService {
       throw new ForbiddenException('User not authorized!!');
     }
 
-    const item = await this.prisma.cart.findUnique({
+    const item = await this.prisma.cart.findMany({
       where: {
-        id: id,
+        userId: user.id,
+        productId: id,
       },
     });
 
     if (!item) {
-      throw new BadRequestException('Cart not found!!');
+      throw new BadRequestException('Item not found on cart!!');
     }
 
     const deletedCartItem = await this.prisma.cart.deleteMany({

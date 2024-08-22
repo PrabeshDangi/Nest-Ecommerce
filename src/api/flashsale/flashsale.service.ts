@@ -43,7 +43,7 @@ export class FlashsaleService {
   ) {
     const { saleStart, saleEnd, discountprice } = updateflashdto;
 
-    if (saleStart < new Date()) {
+    if (saleStart > new Date()) {
       throw new BadRequestException(
         'sale start date should be greater than current date and time!!',
       );
