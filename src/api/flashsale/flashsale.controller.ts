@@ -44,4 +44,9 @@ export class FlashsaleController {
   ) {
     return this.flashsaleService.deleteItemFromFlash(id, req, res);
   }
+
+  @Delete()
+  deleteAllItemsFromFlash(@Req() req, @Res() res) {
+    return this.flashsaleService.deleteAllItemsFromFlash(req, res);
+  }
 }

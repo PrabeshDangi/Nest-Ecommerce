@@ -10,19 +10,49 @@ export class SaleScheduler {
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async handleExpiredSales() {
     const now = new Date();
+    const expiredFlashItems = await this.prisma.flashitem.findMany({
+      where: {
+        saleEnd: {
+          lt: now,
+        },
+      },
+      include: {
+        products: true,
+      },
+    });
 
-    // await this.prisma.product.updateMany({
-    //   where: {
-    //     onSale: true,
-    //     saleEnd: { lt: now },
-    //   },
+    const productIds = expiredFlashItems.flatMap((flashItem) =>
+      flashItem.products.map((product) => product.id),
+    );
 
-    //   data: {
-    //     onSale: false,
-    //     saleStart: null,
-    //     saleEnd: null,
-    //     discountprice: null,
-    //   },
-    // });
+    for (const flashItem of expiredFlashItems) {
+      await this.prisma.$transaction(async (prisma) => {
+        await prisma.flashitem.update({
+          where: { id: flashItem.id },
+          data: {
+            saleEnd: null,
+            saleStart: null,
+            products: {
+              disconnect: flashItem.products.map((product) => ({
+                id: product.id,
+              })),
+            },
+          },
+        });
+      });
+    }
+
+    if (productIds.length > 0) {
+      await this.prisma.product.updateMany({
+        where: {
+          id: {
+            in: productIds,
+          },
+        },
+        data: {
+          onSale: false,
+        },
+      });
+    }
   }
 }

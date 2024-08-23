@@ -21,10 +21,14 @@ export class FlashsaleService {
     });
 
     if (flashItems.length === 0) {
-      return { message: 'No items found on flashsale at the moment!!' };
+      return { message: 'Flashsale not found!!' };
     }
 
     const products = flashItems.flatMap((flashItem) => flashItem.products);
+
+    if (products.length === 0) {
+      return { message: 'No items found on flashsale!!' };
+    }
 
     return { message: 'Flash items fetched successfully', data: products };
   }
@@ -124,41 +128,107 @@ export class FlashsaleService {
     });
   }
 
-  async deleteItemFromFlash(id: number, req: any, res: any) {
+  async deleteItemFromFlash(id: number, req: Request, res: Response) {
     const user = req.user;
 
     if (!user) {
       throw new ForbiddenException('User not authorized!!');
     }
 
-    // const item = await this.prisma.product.findUnique({
-    //   where: { id },
-    // });
+    const flashAvailable = await this.prisma.flashitem.findFirst({
+      where: {
+        products: {
+          some: {
+            id: id,
+          },
+        },
+      },
+      select: {
+        id: true,
+        products: true,
+      },
+    });
 
-    // if (!(item && item.onSale)) {
-    //   throw new NotFoundException('Item not found on sale!!');
-    // }
+    if (!flashAvailable) {
+      return res.status(404).json({
+        message: 'Flash sale or item not found!',
+      });
+    }
 
-    // const originalPrice=await this.prisma.product.findUnique({
-    //     where:{id},
-    //     select:{
-    //         price:true
-    //     }
-    // })
+    const itemFoundInFlash = await this.prisma.flashitem.findFirst({
+      where: {
+        products: {
+          some: {
+            id: id,
+          },
+        },
+      },
+    });
 
-    // await this.prisma.product.update({
-    //   where: { id },
+    if (!itemFoundInFlash) {
+      throw new NotFoundException('Item not found in any flash sale!');
+    }
 
-    //   data: {
-    //     onSale: false,
-    //     saleStart: null,
-    //     saleEnd: null,
-    //     discountprice: null,
-    //   },
-    // });
+    await this.prisma.flashitem.update({
+      where: { id: itemFoundInFlash.id },
+      data: {
+        products: {
+          delete: {
+            id: id,
+          },
+        },
+      },
+    });
 
-    res.status(201).json({
+    res.status(200).json({
       message: 'Item removed from flash successfully!!',
+    });
+  }
+
+  async deleteAllItemsFromFlash(req: Request, res: Response) {
+    const flashItems = await this.prisma.flashitem.findMany({
+      select: {
+        id: true,
+        products: true,
+      },
+    });
+
+    const productIds = flashItems.flatMap((flashItem) =>
+      flashItem.products.map((product) => product.id),
+    );
+
+    for (const flashItem of flashItems) {
+      await this.prisma.$transaction(async (prisma) => {
+        await prisma.flashitem.update({
+          where: { id: flashItem.id },
+          data: {
+            saleEnd: new Date(),
+            saleStart: new Date(),
+            products: {
+              disconnect: flashItem.products.map((product) => ({
+                id: product.id,
+              })),
+            },
+          },
+        });
+      });
+    }
+
+    if (productIds.length > 0) {
+      await this.prisma.product.updateMany({
+        where: {
+          id: {
+            in: productIds,
+          },
+        },
+        data: {
+          onSale: false,
+        },
+      });
+    }
+
+    return res.status(200).json({
+      message: 'All the flashsale items deleted!!',
     });
   }
 }
