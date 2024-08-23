@@ -131,13 +131,13 @@ export class FlashsaleService {
       throw new ForbiddenException('User not authorized!!');
     }
 
-    const item = await this.prisma.product.findUnique({
-      where: { id },
-    });
+    // const item = await this.prisma.product.findUnique({
+    //   where: { id },
+    // });
 
-    if (!(item && item.onSale)) {
-      throw new NotFoundException('Item not found on sale!!');
-    }
+    // if (!(item && item.onSale)) {
+    //   throw new NotFoundException('Item not found on sale!!');
+    // }
 
     // const originalPrice=await this.prisma.product.findUnique({
     //     where:{id},
@@ -146,16 +146,16 @@ export class FlashsaleService {
     //     }
     // })
 
-    await this.prisma.product.update({
-      where: { id },
+    // await this.prisma.product.update({
+    //   where: { id },
 
-      data: {
-        onSale: false,
-        saleStart: null,
-        saleEnd: null,
-        discountprice: null,
-      },
-    });
+    //   data: {
+    //     onSale: false,
+    //     saleStart: null,
+    //     saleEnd: null,
+    //     discountprice: null,
+    //   },
+    // });
 
     res.status(201).json({
       message: 'Item removed from flash successfully!!',
