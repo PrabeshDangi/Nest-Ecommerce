@@ -11,18 +11,18 @@ export class SaleScheduler {
   async handleExpiredSales() {
     const now = new Date();
 
-    await this.prisma.product.updateMany({
-      where: {
-        onSale: true,
-        saleEnd: { lt: now },
-      },
+    // await this.prisma.product.updateMany({
+    //   where: {
+    //     onSale: true,
+    //     saleEnd: { lt: now },
+    //   },
 
-      data: {
-        onSale: false,
-        saleStart: null,
-        saleEnd: null,
-        discountprice: null,
-      },
-    });
+    //   data: {
+    //     onSale: false,
+    //     saleStart: null,
+    //     saleEnd: null,
+    //     discountprice: null,
+    //   },
+    // });
   }
 }

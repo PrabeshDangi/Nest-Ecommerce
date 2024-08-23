@@ -17,6 +17,7 @@ import { JwtGuard } from '../auth/Guard/Jwt.guard';
 import { RolesGuard } from '../auth/Guard/role.guard';
 import { Roles } from 'src/common/decorator/roles.decorators';
 import { Role } from 'src/common/enums/role.enum';
+import { addFlashDto } from './dto/addItem.dto';
 
 @UseGuards(JwtGuard, RolesGuard)
 @Roles(Role.Admin)
@@ -30,14 +31,9 @@ export class FlashsaleController {
     return this.flashsaleService.getAllFlashItems();
   }
 
-  @Post('additem/:id')
-  addItemToFlash(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateflashdto: UpdateFlashDto,
-    @Req() req,
-    @Res() res,
-  ) {
-    return this.flashsaleService.addItemToFlash(id, updateflashdto, req, res);
+  @Post('additem')
+  addItemToFlash(@Body() addflashdto: addFlashDto, @Req() req, @Res() res) {
+    return this.flashsaleService.addItemToFlash(addflashdto, req, res);
   }
 
   @Delete('/:id')

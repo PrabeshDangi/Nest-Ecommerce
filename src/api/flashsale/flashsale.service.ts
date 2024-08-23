@@ -1,49 +1,44 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { PrismaService } from 'src/global/prisma/prisma.service';
-import { UpdateFlashDto } from './dto/updateflash.dto';
-import * as moment from 'moment';
+import { addFlashDto } from './dto/addItem.dto';
 
 @Injectable()
 export class FlashsaleService {
   constructor(private prisma: PrismaService) {}
 
   async getAllFlashItems() {
-    const currentDate = new Date();
-
-    const onSaleItems = await this.prisma.product.findMany({
-      where: {
-        onSale: true,
-        saleStart: {
-          lte: currentDate, // Sale start is less than or equal to the current date
-        },
-        saleEnd: {
-          gte: currentDate, // Sale end is greater than or equal to the current date
-        },
+    const flashItems = await this.prisma.flashitem.findMany({
+      select: {
+        products: true,
       },
     });
 
-    if (onSaleItems.length === 0) {
-      throw new NotFoundException('No items found on sale!!');
+    if (flashItems.length === 0) {
+      return { message: 'No items found on flashsale at the moment!!' };
     }
 
-    return onSaleItems;
+    const products = flashItems.flatMap((flashItem) => flashItem.products);
+
+    return { message: 'Flash items fetched successfully', data: products };
   }
 
-  async addItemToFlash(
-    id: number,
-    updateflashdto: UpdateFlashDto,
-    req: Request,
-    res: Response,
-  ) {
-    const { saleStart, saleEnd, discountprice } = updateflashdto;
+  async addItemToFlash(addflashdto: addFlashDto, req: Request, res: Response) {
+    const user = req.user as { id: number; email: string };
 
-    if (saleStart > new Date()) {
+    if (!user) {
+      throw new ForbiddenException('User not authorized!!');
+    }
+
+    const { saleStart, saleEnd, products } = addflashdto;
+
+    if (saleStart.getDay() < new Date().getDay()) {
       throw new BadRequestException(
         'sale start date should be greater than current date and time!!',
       );
@@ -55,39 +50,77 @@ export class FlashsaleService {
       );
     }
 
-    const itemAvailable = await this.prisma.product.findUnique({
-      where: { id },
+    const availableProducts = await this.prisma.product.findMany({
+      where: {
+        id: {
+          in: products,
+        },
+      },
     });
 
-    if (!itemAvailable) {
-      throw new NotFoundException('Item not found!!');
+    if (!availableProducts) {
+      throw new NotFoundException('Item not found on product list!!');
     }
 
-    if (itemAvailable.onSale) {
-      throw new BadRequestException('Item is already on sale!');
+    const flashAvailable = await this.prisma.flashitem.findFirst();
+
+    if (!flashAvailable) {
+      await this.prisma.flashitem.create({
+        data: {
+          saleStart,
+          saleEnd,
+          products: {
+            connect: availableProducts.map((product) => ({ id: product.id })),
+          },
+        },
+      });
+      return res.status(200).json({
+        message: 'Item added to the flash!!!',
+      });
     }
 
-    const user = req.user as { id: number; email: string };
-
-    if (!user) {
-      throw new ForbiddenException('User not authorized!!');
-    }
-
-    const saleItem = await this.prisma.product.update({
+    const itemAlreadyAdded = await this.prisma.flashitem.findFirst({
       where: {
-        id: id,
+        products: {
+          some: {
+            id: {
+              in: products, // products is the array of product IDs from the request body
+            },
+          },
+        },
+      },
+    });
+
+    if (itemAlreadyAdded) {
+      throw new ConflictException(
+        'Single item cannot be added to flashsale more than once!!',
+      );
+    }
+
+    await this.prisma.flashitem.update({
+      where: { id: flashAvailable.id },
+      data: {
+        saleStart,
+        saleEnd,
+        products: {
+          connect: availableProducts.map((product) => ({ id: product.id })),
+        },
+      },
+    });
+
+    await this.prisma.product.updateMany({
+      where: {
+        id: {
+          in: products,
+        },
       },
       data: {
         onSale: true,
-        saleStart: saleStart,
-        saleEnd: saleEnd,
-        discountprice: discountprice,
       },
     });
 
-    return res.status(201).json({
-      message: 'Item added on flash sale!!',
-      data: saleItem,
+    return res.status(200).json({
+      message: 'Item added to the flash!!!',
     });
   }
 
