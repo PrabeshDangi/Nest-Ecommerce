@@ -5,6 +5,7 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Query,
   Req,
   Res,
   UseGuards,
@@ -28,9 +29,14 @@ export class CartController {
     return this.cartService.getMyCart(req, res);
   }
 
-  @Post('add/:id')
-  addToCart(@Param('id', ParseIntPipe) id: number, @Req() req, @Res() res) {
-    return this.cartService.addItem(id, req, res);
+  @Post(':id')
+  addToCart(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('type') type: string,
+    @Req() req,
+    @Res() res,
+  ) {
+    return this.cartService.addItem(id, type, req, res);
   }
 
   @Delete('delete/:id')

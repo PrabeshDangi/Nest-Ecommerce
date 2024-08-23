@@ -44,30 +44,38 @@ model User {
 }
 
 model Product {
-  id                Int        @id @default(autoincrement())
-  title             String
-  price             Float
-  image             String[]
-  discounttag       Boolean?
-  rating            Float
-  discountprice     Float?
-  sizes             Size?
-  returnpolicy      String
-  description       String
-  brand             String
-  availability      Boolean
-  categories        Category[] @relation("ProductCategories")
-  Cart              Cart[]
-  onSale            Boolean    @default(false)
-  saleStart         DateTime?
-  saleEnd           DateTime?
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
-  Wishlist          Wishlist[]
-  bannerId          Int?
-  banners           Banner[]   @relation("BannerProducts")
-  availablequantity Int        @default(1)
-  soldqunatity      Int?       @default(0)
+  id            Int        @id @default(autoincrement())
+  title         String
+  price         Float
+  image         String[]
+  discounttag   Boolean?
+  rating        Float
+  discountprice Float?
+  sizes         Size?
+  returnpolicy  String
+  description   String
+  brand         String
+  availability  Boolean
+  categories    Category[] @relation("ProductCategories")
+  Cart          Cart[]
+  onSale        Boolean    @default(false)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  Wishlist      Wishlist[]
+  bannerId      Int?
+  banners       Banner[]   @relation("BannerProducts")
+  stock         Int        @default(1)
+  soldqunatity  Int?       @default(0)
+
+  Flashitem   Flashitem? @relation(fields: [flashitemId], references: [id])
+  flashitemId Int?
+}
+
+model Flashitem {
+  id        Int       @id @default(autoincrement())
+  saleStart DateTime  @default(now())
+  saleEnd   DateTime
+  products  Product[]
 }
 
 model Category {
@@ -95,17 +103,6 @@ model Wishlist {
   product   Product @relation(fields: [productId], references: [id])
 
   @@unique([userId, productId])
-}
-
-model FlashSaleProduct {
-  id             Int      @id @default(autoincrement())
-  productId      Int
-  discount       Float
-  startTime      DateTime
-  endTime        DateTime
-  inventoryCount Int
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
 }
 
 model Banner {

@@ -36,13 +36,19 @@ export class CartService {
       throw new ForbiddenException('User not found!!');
     }
 
+    if (userWithCart.cart.length === 0) {
+      return res.status(404).json({
+        message: 'Cart item not found for this user!!',
+      });
+    }
+
     return res.status(200).json({
       message: 'Cart items fetched successfully!!',
       data: userWithCart.cart,
     });
   }
 
-  async addItem(id: number, req: Request, res: Response) {
+  async addItem(id: number, type: string, req: Request, res: Response) {
     const user = req.user as { id: number; email: string };
 
     if (!user) {
@@ -52,7 +58,7 @@ export class CartService {
     const itemAvailable = await this.prisma.product.findUnique({
       where: { id },
       select: {
-        availablequantity: true,
+        stock: true,
       },
     });
 
@@ -67,35 +73,50 @@ export class CartService {
       },
     });
 
-    if (isAlreadyInCart) {
-      const currentQuantity = isAlreadyInCart.quantity;
+    if (type == 'add') {
+      if (!isAlreadyInCart) {
+        const newCartItem = await this.prisma.cart.create({
+          data: {
+            userId: user.id,
+            productId: id,
+          },
+        });
 
-      if (currentQuantity + 1 > itemAvailable.availablequantity) {
-        return res.status(400).json({
-          message: 'Cannot add more items than available quantity!',
+        return res.status(201).json({
+          message: 'Item added to cart!!',
+          data: newCartItem,
         });
       }
-
       await this.prisma.cart.update({
-        where: {
-          id: isAlreadyInCart.id,
-        },
+        where: { id: isAlreadyInCart.id },
         data: {
           quantity: { increment: 1 },
         },
       });
-    } else {
-      await this.prisma.cart.create({
+
+      return res.status(200).json({
+        message: 'Cart quantity increased by 1!!',
+      });
+    } else if (type == 'sub') {
+      if (!isAlreadyInCart) {
+        return res.status(404).json({
+          message: 'Item not found on cart!!',
+        });
+      }
+      await this.prisma.cart.update({
+        where: { id: isAlreadyInCart.id },
         data: {
-          userId: user.id,
-          productId: id,
+          quantity: { decrement: 1 },
         },
       });
+      return res.status(200).json({
+        message: 'Cart quantity reduced!!',
+      });
+    } else {
+      return res.status(400).json({
+        message: 'Invalid type parameter!!',
+      });
     }
-
-    return res.status(201).json({
-      message: 'Item added to cart!!',
-    });
   }
 
   async deleteProductFromCart(id: number, req: Request, res: Response) {
