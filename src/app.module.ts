@@ -12,6 +12,7 @@ import { SaleScheduler } from './global/services/scheduler.service';
 import { CategoryModule } from './api/category/category.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { BannerModule } from './api/banner/banner.module';
+import { EmailModule } from './global/email/email.module';
 
 // global
 @Module({
@@ -31,6 +32,7 @@ import { BannerModule } from './api/banner/banner.module';
     FlashsaleModule,
     CategoryModule,
     BannerModule,
+    EmailModule
   ],
   controllers: [],
   providers: [SaleScheduler],
