@@ -115,9 +115,10 @@ model Banner {
 model PasswordReset {
   id        Int      @id @default(autoincrement())
   userId    Int      @unique
-  otp       Int      @unique
+  otpHash   String
   expiresAt DateTime
   user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
 
   @@index([userId])
 }

@@ -142,51 +142,69 @@ export class ProfileService {
 
   async forgotPassword(dto: forgotPasswordDTO, res: Response) {
     const { email } = dto;
-
+  
     const userAvailable = await this.prisma.user.findUnique({
-      where: {
-        email,
-      },
-      select: {
-        id: true,
-        name: true,
-      },
+      where: { email },
+      select: { id: true, name: true },
     });
-
+  
     if (!userAvailable) {
       throw new NotFoundException('User not registered!!');
     }
-
-    const otp = parseInt(await this.helperService.generateOtp());
+  
+    const otp = await this.helperService.generateOtp();
     const otpExpiration = new Date(Date.now() + 120000);
-
-    const emailTemplate = await templateBuilder(userAvailable.name, email, otp);
-
-    await this.emailService.sendEmail(emailTemplate, res);
-
-    await this.prisma.passwordReset.create({
-      data: {
+    const otpHash = await bcrypt.hash(otp, 10); 
+  
+    const existingOtp = await this.prisma.passwordReset.findFirst({
+      where: {
         userId: userAvailable.id,
-        otp,
-        expiresAt: otpExpiration,
       },
     });
-
-    return res.status(200).json({
-      message: 'Password reset email sent successfully!!',
-    });
+  
+    if (existingOtp) {
+      await this.prisma.passwordReset.update({
+        where: { id: existingOtp.id },
+        data: {
+          otpHash,
+          expiresAt: otpExpiration,
+        },
+      });
+    } else {
+      await this.prisma.passwordReset.create({
+        data: {
+          userId: userAvailable.id,
+          otpHash,
+          expiresAt: otpExpiration,
+        },
+      });
+    }
+  
+    const emailTemplate = await templateBuilder(userAvailable.name, email, parseInt(otp));
+    await this.emailService.sendEmail(emailTemplate, res);
+  
+    return res.status(200).json({ message: 'Password reset email sent successfully!!' });
   }
+  
+
+
   async resetPassword(resetpassworddto: resetPasswordDTO, res: Response) {
     const { otp, password } = resetpassworddto;
 
-    const otpAvailable = await this.prisma.passwordReset.findUnique({
+    const otpAvailable = await this.prisma.passwordReset.findFirst({
       where: {
-        otp,
+        expiresAt:{gt:new Date()}
       },
     });
 
-    if (!otpAvailable || otpAvailable.expiresAt < new Date()) {
+    if (!otpAvailable ) {
       throw new BadRequestException('Invalid or expired OTP!!');
+    }
+
+    const isValidOtp=await bcrypt.compare(otp.toString(),otpAvailable.otpHash)
+
+    if(!isValidOtp){
+      throw new BadRequestException("Invalid Otp!!")
     }
 
     const hashedpassword = await bcrypt.hash(password, 10);
@@ -202,7 +220,7 @@ export class ProfileService {
 
     await this.prisma.passwordReset.delete({
       where: {
-        otp,
+        id:otpAvailable.id,
       },
     });
 
