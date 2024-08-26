@@ -15,6 +15,9 @@ import { changePasswordDto } from './dto/changePassword.dto';
 import { forgotPasswordDTO } from './dto/forgotPassword.dto';
 import { Public } from 'src/common/decorator/public.decorator';
 import { resetPasswordDTO } from './dto/resetPassword.dto';
+import { RolesGuard } from '../auth/Guard/role.guard';
+import { Roles } from 'src/common/decorator/roles.decorators';
+import { Role } from 'src/common/enums/role.enum';
 
 @UseGuards(JwtGuard)
 @Controller('profile')
@@ -24,6 +27,13 @@ export class ProfileController {
   @Get()
   getMyProfile(@Req() req, @Res() res) {
     return this.profileService.getMyProfile(req, res);
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles(Role.Admin)
+  @Get('users')
+  getUsers(@Req() req, @Res() res) {
+    return this.profileService.getUsers(req, res);
   }
 
   @Patch('updateprofile')

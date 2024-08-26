@@ -47,6 +47,27 @@ export class ProfileService {
     });
   }
 
+  async getUsers(req: Request, res: Response) {
+    const user = req.user as { id: number; email: string };
+
+    if (!user) {
+      throw new ForbiddenException('User not authorized!!');
+    }
+
+    const usersAvailable = await this.prisma.user.findMany();
+
+    if (usersAvailable.length === 0) {
+      return res.status(404).json({
+        message: 'No users found!!',
+      });
+    }
+
+    return res.status(200).json({
+      message: 'Users fetched successfully!!',
+      data: usersAvailable,
+    });
+  }
+
   async updateProfile(updatedto: updateDto, req: Request, res: Response) {
     const user = req.user as { id: number; email: string };
     const userAvailable = await this.prisma.user.findUnique({
