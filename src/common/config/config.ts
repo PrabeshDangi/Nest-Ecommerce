@@ -1,7 +1,5 @@
 // parse
 
-import { supabase } from './supabase.config';
-
 export default () => ({
   database: {
     connectionString: process.env.DATABASE_URL,

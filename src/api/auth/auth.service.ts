@@ -108,7 +108,9 @@ export class AuthService {
 
   async signToken(args: { id: number; email: string }) {
     const payload = args;
-    const secret = this.configservice.get<string>('jwtsecret');
-    return this.jwt.sign(payload, { secret });
+    return this.jwt.sign(payload, {
+      secret: process.env.JWT_SECRET,
+      expiresIn: process.env.JWT_EXPIRATION,
+    });
   }
 }

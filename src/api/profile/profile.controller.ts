@@ -12,6 +12,9 @@ import { ProfileService } from './profile.service';
 import { JwtGuard } from 'src/api/auth/Guard/Jwt.guard';
 import { updateDto } from './dto/updateProfile.dto';
 import { changePasswordDto } from './dto/changePassword.dto';
+import { forgotPasswordDTO } from './dto/forgotPassword.dto';
+import { Public } from 'src/common/decorator/public.decorator';
+import { resetPasswordDTO } from './dto/resetPassword.dto';
 
 @UseGuards(JwtGuard)
 @Controller('profile')
@@ -35,5 +38,17 @@ export class ProfileController {
     @Res() res,
   ) {
     return this.profileService.changePassword(changepassworddto, req, res);
+  }
+
+  @Public()
+  @Post('forgotpassword')
+  forgotPassword(@Body() forgotpassworddto: forgotPasswordDTO, @Res() res) {
+    return this.profileService.forgotPassword(forgotpassworddto, res);
+  }
+
+  @Public()
+  @Post('resetpassword')
+  resetPassword(@Body() resetpassworddto: resetPasswordDTO, @Res() res) {
+    return this.profileService.resetPassword(resetpassworddto, res);
   }
 }

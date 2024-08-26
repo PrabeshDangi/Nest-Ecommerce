@@ -5,7 +5,6 @@ import {
   IsEnum,
   IsNotEmpty,
 } from 'class-validator';
-import { Type } from 'class-transformer';
 import { Size } from '@prisma/client';
 
 // export class CategoryDto {
@@ -24,7 +23,7 @@ export class CreateProductDto {
   @IsNotEmpty()
   price: number;
 
-  image: string[];
+  image?: string[];
 
   @IsOptional()
   discounttag?: boolean;
@@ -37,7 +36,7 @@ export class CreateProductDto {
 
   @IsOptional()
   @IsEnum(Size)
-  sizes?: string;
+  sizes?: Size;
 
   @IsString()
   returnpolicy: string;
