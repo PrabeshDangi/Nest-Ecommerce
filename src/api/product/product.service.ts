@@ -50,7 +50,11 @@ export class ProductService {
   }
 
   async getAllProducts(res: Response) {
-    const products = await this.prisma.product.findMany();
+    const products = await this.prisma.product.findMany({
+      include: {
+        categories: true,
+      },
+    });
 
     if (products.length === 0) {
       throw new NotFoundException('No products found!!');
@@ -67,6 +71,9 @@ export class ProductService {
     const product = await this.prisma.product.findUnique({
       where: {
         id,
+      },
+      include: {
+        categories: true,
       },
     });
 

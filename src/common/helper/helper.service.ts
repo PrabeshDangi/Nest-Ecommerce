@@ -23,7 +23,7 @@ export class HelperService {
 
   async generateOtp() {
     const digits = '0123456789';
-    let OTP = ' ';
+    let OTP = '';
     const length = digits.length;
     for (let i = 0; i < 4; i++) {
       OTP += digits[Math.floor(Math.random() * length)];

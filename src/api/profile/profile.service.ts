@@ -142,26 +142,26 @@ export class ProfileService {
 
   async forgotPassword(dto: forgotPasswordDTO, res: Response) {
     const { email } = dto;
-  
+
     const userAvailable = await this.prisma.user.findUnique({
       where: { email },
       select: { id: true, name: true },
     });
-  
+
     if (!userAvailable) {
       throw new NotFoundException('User not registered!!');
     }
-  
+
     const otp = await this.helperService.generateOtp();
     const otpExpiration = new Date(Date.now() + 120000);
-    const otpHash = await bcrypt.hash(otp, 10); 
-  
+    const otpHash = await bcrypt.hash(otp, 10);
+
     const existingOtp = await this.prisma.passwordReset.findFirst({
       where: {
         userId: userAvailable.id,
       },
     });
-  
+
     if (existingOtp) {
       await this.prisma.passwordReset.update({
         where: { id: existingOtp.id },
@@ -179,39 +179,47 @@ export class ProfileService {
         },
       });
     }
-  
-    const emailTemplate = await templateBuilder(userAvailable.name, email, parseInt(otp));
-    await this.emailService.sendEmail(emailTemplate, res);
-  
-    return res.status(200).json({ message: 'Password reset email sent successfully!!' });
-  }
-  
 
+    const emailTemplate = await templateBuilder(userAvailable.name, email, otp);
+    await this.emailService.sendEmail(emailTemplate, res);
+
+    return res
+      .status(200)
+      .json({ message: 'Password reset email sent successfully!!' });
+  }
 
   async resetPassword(resetpassworddto: resetPasswordDTO, res: Response) {
     const { otp, password } = resetpassworddto;
 
-    const otpAvailable = await this.prisma.passwordReset.findFirst({
+    const otpAvailable = await this.prisma.passwordReset.findMany({
       where: {
-        expiresAt:{gt:new Date()}
+        expiresAt: { gt: new Date() },
       },
     });
 
-    if (!otpAvailable ) {
-      throw new BadRequestException('Invalid or expired OTP!!');
+    if (!otpAvailable) {
+      throw new BadRequestException('No valid otp!!');
     }
 
-    const isValidOtp=await bcrypt.compare(otp.toString(),otpAvailable.otpHash)
+    let matchingOtpRecord = null;
 
-    if(!isValidOtp){
-      throw new BadRequestException("Invalid Otp!!")
+    for (const record of otpAvailable) {
+      const isValidOtp = await bcrypt.compare(otp, record.otpHash);
+      if (isValidOtp) {
+        matchingOtpRecord = record;
+        break;
+      }
+    }
+
+    if (!matchingOtpRecord) {
+      throw new BadRequestException('Invalid Otp!!');
     }
 
     const hashedpassword = await bcrypt.hash(password, 10);
 
     await this.prisma.user.update({
       where: {
-        id: otpAvailable.userId,
+        id: matchingOtpRecord.userId,
       },
       data: {
         password: hashedpassword,
@@ -220,7 +228,7 @@ export class ProfileService {
 
     await this.prisma.passwordReset.delete({
       where: {
-        id:otpAvailable.id,
+        id: matchingOtpRecord.id,
       },
     });
 
