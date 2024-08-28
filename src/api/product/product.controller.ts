@@ -10,7 +10,6 @@ import {
   Query,
   Req,
   Res,
-  UploadedFile,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
@@ -24,7 +23,7 @@ import { Role } from 'src/common/enums/role.enum';
 import { UpdateProductDto } from './dto/updateproduct.dto';
 import { Roles } from 'src/common/decorator/roles.decorators';
 import { Public } from 'src/common/decorator/public.decorator';
-import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import {  FilesInterceptor } from '@nestjs/platform-express';
 
 @UseGuards(JwtGuard, RolesGuard)
 @Roles(Role.Admin)

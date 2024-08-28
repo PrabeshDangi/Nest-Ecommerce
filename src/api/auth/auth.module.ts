@@ -7,6 +7,7 @@ import { PrismaService } from 'src/global/prisma/prisma.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './Guard/Jwt.strategy';
+import { EmailModule } from 'src/global/email/email.module';
 
 // @Module({
 
@@ -25,6 +26,7 @@ import { JwtStrategy } from './Guard/Jwt.strategy';
 @Module({
   imports: [
     PrismaModule,
+    EmailModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -34,9 +36,9 @@ import { JwtStrategy } from './Guard/Jwt.strategy';
         signOptions: { expiresIn: configService.get<string>('JWT_EXPIRATION') },
       }),
     }),
-  ], 
+  ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, PrismaService ],
+  providers: [AuthService, JwtStrategy, PrismaService],
   exports: [AuthService, JwtModule, PassportModule],
 })
 export class AuthModule {}

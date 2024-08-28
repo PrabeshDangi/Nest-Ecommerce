@@ -6,12 +6,11 @@ import {
 } from '@nestjs/common';
 import { CreateProductDto } from './dto/createproduct.dto';
 import { Request, Response } from 'express';
-import { Prisma, Product, Size } from '@prisma/client';
+import { Product } from '@prisma/client';
 import { UpdateProductDto } from './dto/updateproduct.dto';
 import { PrismaService } from 'src/global/prisma/prisma.service';
 import { ImageUploadService } from 'src/global/services/imageupload.service';
 import { HelperService } from 'src/common/helper/helper.service';
-import { supabase } from 'src/common/config/supabase.config';
 
 @Injectable()
 export class ProductService {
@@ -94,6 +93,7 @@ export class ProductService {
       },
       take: 10,
       select: {
+        id: true,
         title: true,
         description: true,
         brand: true,
@@ -177,7 +177,6 @@ export class ProductService {
       throw new BadRequestException('Image uploading error!!');
     }
 
-    // console.log(createproductdto);
     const categoryIds = createproductdto.categories
       .split(',')
       .map((categoryId) => parseInt(categoryId.trim()))
@@ -193,7 +192,7 @@ export class ProductService {
         ),
         rating: parseFloat(createproductdto.rating as unknown as string),
         discounttag: createproductdto.discounttag == ('true' as unknown),
-        sizes: createproductdto.sizes as Size,
+        sizes: createproductdto.sizes,
         returnpolicy: createproductdto.returnpolicy,
         description: createproductdto.description,
         brand: createproductdto.brand,
@@ -410,8 +409,6 @@ export class ProductService {
       throw new NotFoundException('Product of given id not found!!');
     }
 
-    // currentProduct.image =undefined;
-
     const updatedProduct = await this.prisma.product.update({
       where: { id },
       data: {
@@ -444,8 +441,6 @@ export class ProductService {
     }
 
     const publicId = await this.HelperService.extractPublicId(url);
-
-    //console.log(publicId);
 
     const imageRemaining = currentItem.image.filter(
       (ImageUrl) => ImageUrl !== url,

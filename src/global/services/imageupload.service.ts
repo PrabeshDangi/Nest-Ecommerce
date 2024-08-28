@@ -9,8 +9,6 @@ export class ImageUploadService {
       const { originalname, buffer } = file;
       const fileName = `${uuidv4()}-${originalname}`;
 
-      //console.log(file);
-
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from(process.env.BUCKET_NAME)
         .upload(`public/${fileName}`, file.buffer, {
@@ -18,8 +16,6 @@ export class ImageUploadService {
           upsert: false,
           contentType: file.mimetype,
         });
-
-      //console.log(uploadData);
 
       if (uploadError) {
         throw new HttpException(

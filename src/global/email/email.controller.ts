@@ -8,13 +8,13 @@ export class EmailController {
 
   // @Post('send')
   // async sendEmail(@Res() res) {
-  //   // const dto:sendEmailDto={
-  //   //   from:{name:"Prabesh",address:"Libali"},
-  //   //   recepients:[{name:"Test Kumar",address:"testkumar@gmail.com"}],
-  //   //   subject:"Test email",
-  //   //   html:"<h3>Hello from test email!!</h3>"
-  //   // }
-  //   //const dto:sendEmailDto=await
+  //   const dto: sendEmailDto = {
+  //     recepients: [
+  //       { name: 'Prabesh Dangi', address: 'dangiprabesh58@gmail.com' },
+  //     ],
+  //     subject: 'Test email',
+  //     html: '<h3>Hello from test email from mailtrap!!</h3>',
+  //   };
   //   return this.emailService.sendEmail(dto, res);
   // }
 }

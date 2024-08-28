@@ -28,17 +28,18 @@ enum Size {
 }
 
 model User {
-  id            Int            @id @default(autoincrement())
-  name          String
-  email         String         @unique
-  password      String
-  phone         String         @unique
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  cart          Cart[]
-  role          UserRole       @default(user)
-  Wishlist      Wishlist[]
-  PasswordReset PasswordReset?
+  id              Int            @id @default(autoincrement())
+  name            String
+  email           String         @unique
+  password        String
+  phone           String         @unique
+  isEmailVerified Boolean        @default(false)
+  cart            Cart[]
+  role            UserRole       @default(user)
+  Wishlist        Wishlist[]
+  PasswordReset   PasswordReset?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
 
   @@index([email])
   @@index([phone])

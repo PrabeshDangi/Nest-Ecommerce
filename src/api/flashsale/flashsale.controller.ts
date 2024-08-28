@@ -12,7 +12,6 @@ import {
 } from '@nestjs/common';
 import { FlashsaleService } from './flashsale.service';
 import { Public } from 'src/common/decorator/public.decorator';
-import { UpdateFlashDto } from './dto/updateflash.dto';
 import { JwtGuard } from '../auth/Guard/Jwt.guard';
 import { RolesGuard } from '../auth/Guard/role.guard';
 import { Roles } from 'src/common/decorator/roles.decorators';

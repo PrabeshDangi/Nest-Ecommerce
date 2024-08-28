@@ -3,23 +3,30 @@ import * as nodemailer from 'nodemailer';
 import { sendEmailDto } from './dto/sendEmail.dto';
 import { MailOptions } from 'nodemailer/lib/sendmail-transport';
 import { Response } from 'express';
-import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class EmailService {
   mailTransport() {
-    // console.log(
-    //   process.env.HOST,
-    //   process.env.USERNAME,
-    //   process.env.MAILTRAP_PASS,
-    // );
+    //For mailtrap
+    // const transporter = nodemailer.createTransport({
+    //   host: process.env.HOST,
+    //   port: 587,
+    //   secure: false,
+    //   auth: {
+    //     user: process.env.MAILTRAP_USER,
+    //     pass: process.env.MAILTRAP_PASS,
+    //   },
+    // });
+
+    //For Gmail
     const transporter = nodemailer.createTransport({
-      host: process.env.HOST,
-      port: 587,
-      secure: false,
+      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
       auth: {
-        user: process.env.MAILTRAP_USER,
-        pass: process.env.MAILTRAP_PASS,
+        user: process.env.MY_GMAIL,
+        pass: process.env.GMAIL_PASS,
       },
     });
 
@@ -46,8 +53,32 @@ export class EmailService {
         console.error('Error occurred while sending email:', error);
         return res.status(500).json({ message: 'Error sending email', error });
       }
+      //Intentional comment
       // console.log('Email sent successfully:', info);
       // return res.status(200).json({ message: 'Email sent successfully', info });
+    });
+  }
+
+  async sendVerificationEmail(email: string, token: string) {
+    const transport = this.mailTransport();
+
+    const verificationUrl = `${process.env.VERIFICATION_URL}${token}`;
+
+    const options: MailOptions = {
+      from: {
+        name: process.env.DEFAULT_ADDRESS,
+        address: process.env.DEFAULT_EMAIL,
+      },
+      to: email,
+      html: `<b>Please verify your email by clicking on the link:</b> <a href="${verificationUrl}">${verificationUrl}</a>`,
+      subject: 'Email verification',
+    };
+
+    transport.sendMail(options, (error, info) => {
+      if (error) {
+        return { message: 'Error sending email', error };
+      }
+      return { message: 'Email sent successfully', info };
     });
   }
 }
