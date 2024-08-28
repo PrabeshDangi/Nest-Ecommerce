@@ -1,7 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  Param,
+  ParseIntPipe,
   Patch,
   Post,
   Req,
@@ -34,6 +37,13 @@ export class ProfileController {
   @Get('users')
   getUsers(@Req() req, @Res() res) {
     return this.profileService.getUsers(req, res);
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles(Role.Admin)
+  @Delete()
+  deleteUser(@Param('id', ParseIntPipe) id: number, @Req() req) {
+    return this.profileService.deleteUser(id, req);
   }
 
   @Patch('updateprofile')

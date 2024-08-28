@@ -73,6 +73,13 @@ export class ProductService {
       },
       include: {
         categories: true,
+        ratings:{
+          select:{
+            id:true,
+            rating:true,
+            comment:true
+          }
+        }
       },
     });
 
@@ -99,7 +106,6 @@ export class ProductService {
         brand: true,
         price: true,
         image: true,
-        rating: true,
         availability: true,
         soldqunatity: true,
       },
@@ -190,7 +196,6 @@ export class ProductService {
         discountprice: parseFloat(
           createproductdto.discountprice as unknown as string,
         ),
-        rating: parseFloat(createproductdto.rating as unknown as string),
         discounttag: createproductdto.discounttag == ('true' as unknown),
         sizes: createproductdto.sizes,
         returnpolicy: createproductdto.returnpolicy,

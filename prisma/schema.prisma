@@ -38,6 +38,7 @@ model User {
   role            UserRole       @default(user)
   Wishlist        Wishlist[]
   PasswordReset   PasswordReset?
+  ratings         Rating[]
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
 
@@ -51,7 +52,6 @@ model Product {
   price         Float
   image         String[]
   discounttag   Boolean?
-  rating        Float
   discountprice Float?
   sizes         Size?
   returnpolicy  String
@@ -68,9 +68,23 @@ model Product {
   banners       Banner[]   @relation("BannerProducts")
   stock         Int        @default(1)
   soldqunatity  Int?       @default(0)
+  ratings       Rating[]
 
-  Flashitem   Flashitem? @relation(fields: [flashitemId], references: [id])
+  Flashitem   Flashitem? @relation(fields: [flashitemId], references: [id], onDelete: Cascade)
   flashitemId Int?
+}
+
+model Rating {
+  id        Int      @id @default(autoincrement())
+  rating    Int
+  comment   String?
+  userId    Int
+  productId Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
 
 model Flashitem {
@@ -89,9 +103,9 @@ model Category {
 model Cart {
   id        Int     @id @default(autoincrement())
   userId    Int
-  user      User    @relation(fields: [userId], references: [id])
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   productId Int
-  product   Product @relation(fields: [productId], references: [id])
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   quantity  Int     @default(1)
 
   @@unique([userId, productId])
@@ -100,9 +114,9 @@ model Cart {
 model Wishlist {
   id        Int     @id @default(autoincrement())
   userId    Int
-  user      User    @relation(fields: [userId], references: [id])
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   productId Int
-  product   Product @relation(fields: [productId], references: [id])
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([userId, productId])
 }

@@ -54,7 +54,11 @@ export class ProfileService {
       throw new ForbiddenException('User not authorized!!');
     }
 
-    const usersAvailable = await this.prisma.user.findMany();
+    const usersAvailable = await this.prisma.user.findMany({
+      where: {
+        role: 'user',
+      },
+    });
 
     if (usersAvailable.length === 0) {
       return res.status(404).json({
@@ -66,6 +70,30 @@ export class ProfileService {
       message: 'Users fetched successfully!!',
       data: usersAvailable,
     });
+  }
+
+  async deleteUser(id: number, req: Request) {
+    const user = req.user as { id: number; email: string };
+
+    if (!user) {
+      throw new ForbiddenException('User not authorized!!');
+    }
+
+    const userAvailable = await this.prisma.user.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!userAvailable) {
+      throw new NotFoundException('User not found!!!');
+    }
+
+    await this.prisma.user.delete({
+      where: { id },
+    });
+
+    return { message: 'User deleted successfully!!' };
   }
 
   async updateProfile(updatedto: updateDto, req: Request, res: Response) {

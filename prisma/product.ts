@@ -11,7 +11,6 @@ let dummyProducts: Product[] = Array.from({ length: 100 }).map(() => ({
   price: parseFloat(faker.commerce.price()),
   image: [faker.image.imageUrl(), faker.image.imageUrl()], // Generating an array of image URLs
   discounttag: faker.datatype.boolean(),
-  rating: parseFloat(faker.datatype.float({ min: 1, max: 5 }).toFixed(1)),
   discountprice: faker.datatype.boolean()
     ? parseFloat(faker.commerce.price())
     : null,
@@ -53,7 +52,6 @@ async function main() {
         price: product.price,
         image: product.image,
         discounttag: product.discounttag,
-        rating: product.rating,
         discountprice: product.discountprice,
         sizes: product.sizes,
         returnpolicy: product.returnpolicy,
