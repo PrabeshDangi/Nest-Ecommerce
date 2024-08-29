@@ -12,6 +12,48 @@ import { updateRatingDTO } from './dto/update-rating.dto';
 export class RatingService {
   constructor(private prisma: PrismaService) {}
 
+  async getRating(id: number) {
+    const itemAvailable = await this.prisma.product.findUnique({
+      where: { id },
+    });
+
+    if (!itemAvailable) {
+      throw new NotFoundException('Product not found!!');
+    }
+
+    const aggregateRating = await this.prisma.rating.aggregate({
+      where: { productId: id },
+      _avg: {
+        rating: true,
+      },
+      _count: {
+        id: true,
+      },
+    });
+
+    const averageRating = aggregateRating._avg.rating || 0;
+    const totalRating = aggregateRating._count.id || 0;
+
+    const allRatings = await this.prisma.product.findMany({
+      where: { id },
+      select: {
+        ratings: {
+          select: {
+            id: true,
+            rating: true,
+            comment: true,
+          },
+        },
+      },
+    });
+
+    return {
+      averageRating,
+      totalRating,
+      allRatings,
+    };
+  }
+
   async createRating(
     id: number,
     createproductdto: createRatingDTO,

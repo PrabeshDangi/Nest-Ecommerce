@@ -20,9 +20,9 @@ async function bootstrap() {
   app.use(cookieParser());
   app.use(bodyparser.urlencoded({ extended: true }));
   app.enableCors({
-    origin: '*', 
-    credentials: true, // Allow cookies to be sent
-  }); 
+    origin: '*',
+    credentials: true,
+  });
   await app.listen(port);
 }
 bootstrap();

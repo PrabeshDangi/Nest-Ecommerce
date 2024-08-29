@@ -58,20 +58,19 @@ model Product {
   description   String
   brand         String
   availability  Boolean
-  categories    Category[] @relation("ProductCategories")
-  Cart          Cart[]
   onSale        Boolean    @default(false)
+  soldqunatity  Int?       @default(0)
   createdAt     DateTime   @default(now())
+  stock         Int        @default(1)
   updatedAt     DateTime   @updatedAt
+  Cart          Cart[]
   Wishlist      Wishlist[]
+  ratings       Rating[]
   bannerId      Int?
   banners       Banner[]   @relation("BannerProducts")
-  stock         Int        @default(1)
-  soldqunatity  Int?       @default(0)
-  ratings       Rating[]
-
-  Flashitem   Flashitem? @relation(fields: [flashitemId], references: [id], onDelete: Cascade)
-  flashitemId Int?
+  categories    Category[] @relation("ProductCategories")
+  flashitemId   Int?
+  Flashitem     Flashitem? @relation(fields: [flashitemId], references: [id], onDelete: Cascade)
 }
 
 model Rating {

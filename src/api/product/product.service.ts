@@ -73,13 +73,13 @@ export class ProductService {
       },
       include: {
         categories: true,
-        ratings:{
-          select:{
-            id:true,
-            rating:true,
-            comment:true
-          }
-        }
+        ratings: {
+          select: {
+            id: true,
+            rating: true,
+            comment: true,
+          },
+        },
       },
     });
 

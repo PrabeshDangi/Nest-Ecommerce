@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Param,
   ParseIntPipe,
   Patch,
@@ -17,12 +18,19 @@ import { RolesGuard } from '../auth/Guard/role.guard';
 import { Roles } from 'src/common/decorator/roles.decorators';
 import { Role } from 'src/common/enums/role.enum';
 import { updateRatingDTO } from './dto/update-rating.dto';
+import { Public } from 'src/common/decorator/public.decorator';
 
 @UseGuards(JwtGuard, RolesGuard)
 @Roles(Role.User)
 @Controller('rating')
 export class RatingController {
   constructor(private readonly ratingService: RatingService) {}
+
+  @Public()
+  @Get(':id')
+  getRating(@Param('id', ParseIntPipe) id: number) {
+    return this.ratingService.getRating(id);
+  }
 
   @Post('create/:id')
   createRating(
