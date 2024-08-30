@@ -7,9 +7,10 @@ import { PrismaService } from '../prisma/prisma.service';
 export class SaleScheduler {
   constructor(private readonly prisma: PrismaService) {}
 
-  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  @Cron(CronExpression.EVERY_MINUTE)
   async handleExpiredSales() {
     const now = new Date();
+
     const expiredFlashItems = await this.prisma.flashitem.findMany({
       where: {
         saleEnd: {
@@ -21,24 +22,24 @@ export class SaleScheduler {
       },
     });
 
-    const productIds = expiredFlashItems.flatMap((flashItem) =>
-      flashItem.products.map((product) => product.id),
-    );
+    const productIds = [];
 
     for (const flashItem of expiredFlashItems) {
       await this.prisma.$transaction(async (prisma) => {
+        const disconnectedProducts = flashItem.products.map((product) => ({
+          id: product.id,
+        }));
+
         await prisma.flashitem.update({
           where: { id: flashItem.id },
           data: {
-            saleEnd: null,
-            saleStart: null,
             products: {
-              disconnect: flashItem.products.map((product) => ({
-                id: product.id,
-              })),
+              disconnect: disconnectedProducts,
             },
           },
         });
+
+        productIds.push(...disconnectedProducts.map((product) => product.id));
       });
     }
 

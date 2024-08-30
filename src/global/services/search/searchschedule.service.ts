@@ -8,10 +8,10 @@ import { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 export class SearchScheduleService {
   constructor(
     private prisma: PrismaService,
-    private elasticsearchService: ElasticsearchService, 
+    private elasticsearchService: ElasticsearchService,
   ) {}
 
-  @Cron(CronExpression.EVERY_MINUTE)
+  //@Cron(CronExpression.EVERY_MINUTE)
   async bulkIndexProducts() {
     const products = await this.prisma.product.findMany({
       include: { ratings: true },

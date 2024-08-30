@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { PrismaService } from 'src/global/prisma/prisma.service';
-import { addFlashDto } from './dto/addItem.dto';
+import { AddFlashDto } from './dto/addItem.dto';
 
 @Injectable()
 export class FlashsaleService {
@@ -33,7 +33,7 @@ export class FlashsaleService {
     return { message: 'Flash items fetched successfully', data: products };
   }
 
-  async addItemToFlash(addflashdto: addFlashDto, req: Request, res: Response) {
+  async addItemToFlash(addflashdto: AddFlashDto, req: Request, res: Response) {
     const user = req.user as { id: number; email: string };
 
     if (!user) {
@@ -42,15 +42,20 @@ export class FlashsaleService {
 
     const { saleStart, saleEnd, products } = addflashdto;
 
-    if (saleStart.getDay() < new Date().getDay()) {
+    // Parse saleStart and saleEnd to Date objects
+    const start = new Date(saleStart);
+    const end = new Date(saleEnd);
+    const now = new Date();
+
+    if (start.getDay() < now.getDay()) {
       throw new BadRequestException(
-        'sale start date should be greater than current date and time!!',
+        'Sale start date should be greater than the current date and time!!',
       );
     }
 
-    if (saleEnd < saleStart) {
+    if (end <= start || end <= now) {
       throw new BadRequestException(
-        'Sale start date must be smaller than the sale end date!!',
+        'Sale start date must be smaller than the sale end date, and sale end date must not be less than the current time!!',
       );
     }
 
@@ -62,8 +67,8 @@ export class FlashsaleService {
       },
     });
 
-    if (!availableProducts) {
-      throw new NotFoundException('Item not found on product list!!');
+    if (availableProducts.length === 0) {
+      throw new NotFoundException('No products found with the given IDs!!');
     }
 
     const flashAvailable = await this.prisma.flashitem.findFirst();
@@ -71,24 +76,25 @@ export class FlashsaleService {
     if (!flashAvailable) {
       await this.prisma.flashitem.create({
         data: {
-          saleStart,
-          saleEnd,
+          saleStart: start,
+          saleEnd: end,
           products: {
             connect: availableProducts.map((product) => ({ id: product.id })),
           },
         },
       });
       return res.status(200).json({
-        message: 'Item added to the flash!!!',
+        message: 'Item added to the flash sale!',
       });
     }
 
     const itemAlreadyAdded = await this.prisma.flashitem.findFirst({
       where: {
+        id: flashAvailable.id,
         products: {
           some: {
             id: {
-              in: products, // products is the array of product IDs from the request body
+              in: products,
             },
           },
         },
@@ -97,15 +103,15 @@ export class FlashsaleService {
 
     if (itemAlreadyAdded) {
       throw new ConflictException(
-        'Single item cannot be added to flashsale more than once!!',
+        'Single item cannot be added to the flash sale more than once!!',
       );
     }
 
     await this.prisma.flashitem.update({
       where: { id: flashAvailable.id },
       data: {
-        saleStart,
-        saleEnd,
+        saleStart: start,
+        saleEnd: end,
         products: {
           connect: availableProducts.map((product) => ({ id: product.id })),
         },
@@ -124,7 +130,7 @@ export class FlashsaleService {
     });
 
     return res.status(200).json({
-      message: 'Item added to the flash!!!',
+      message: 'Items added to the flash sale!',
     });
   }
 
@@ -173,9 +179,7 @@ export class FlashsaleService {
       where: { id: itemFoundInFlash.id },
       data: {
         products: {
-          delete: {
-            id: id,
-          },
+          disconnect: { id },
         },
       },
     });

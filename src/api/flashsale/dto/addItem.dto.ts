@@ -1,7 +1,7 @@
 import { Type } from 'class-transformer';
 import { IsDate, IsNotEmpty } from 'class-validator';
 
-export class addFlashDto {
+export class AddFlashDto {
   @IsDate()
   @Type(() => Date)
   saleStart: Date;
