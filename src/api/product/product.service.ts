@@ -11,6 +11,7 @@ import { UpdateProductDto } from './dto/updateproduct.dto';
 import { PrismaService } from 'src/global/prisma/prisma.service';
 import { ImageUploadService } from 'src/global/services/imageupload.service';
 import { HelperService } from 'src/common/helper/helper.service';
+import { SearchService } from 'src/global/elasticsearch/Search.service';
 
 @Injectable()
 export class ProductService {
@@ -18,6 +19,7 @@ export class ProductService {
     private prisma: PrismaService,
     private ImageService: ImageUploadService,
     private HelperService: HelperService,
+    private searchService: SearchService,
   ) {}
 
   async searchProduct(sstring: string) {
@@ -35,6 +37,11 @@ export class ProductService {
     return {
       results,
     };
+  }
+
+  async searchProducts(query: string): Promise<Product[]> {
+    const results = await this.searchService.searchDocuments(query);
+    return results.map((hit) => hit._source as Product);
   }
 
   async getNewArrival() {

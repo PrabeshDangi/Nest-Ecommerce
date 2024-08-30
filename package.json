@@ -24,10 +24,12 @@
     "seed:categories": "ts-node --transpile-only prisma/category.ts"
   },
   "dependencies": {
+    "@elastic/elasticsearch": "^8.15.0",
     "@faker-js/faker": "^8.4.1",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.2.3",
     "@nestjs/core": "^10.0.0",
+    "@nestjs/elasticsearch": "^10.0.1",
     "@nestjs/jwt": "^10.2.0",
     "@nestjs/mapped-types": "*",
     "@nestjs/passport": "^10.0.3",

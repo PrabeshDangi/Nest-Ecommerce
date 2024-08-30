@@ -23,7 +23,8 @@ import { Role } from 'src/common/enums/role.enum';
 import { UpdateProductDto } from './dto/updateproduct.dto';
 import { Roles } from 'src/common/decorator/roles.decorators';
 import { Public } from 'src/common/decorator/public.decorator';
-import {  FilesInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { Product } from '@prisma/client';
 
 @UseGuards(JwtGuard, RolesGuard)
 @Roles(Role.Admin)
@@ -35,6 +36,11 @@ export class ProductController {
   @Get()
   searchProduct(@Query('q') sstring: string) {
     return this.productService.searchProduct(sstring);
+  }
+
+  @Get('search')
+  async search(@Query('query') query: string): Promise<Product[]> {
+    return this.productService.searchProducts(query);
   }
 
   @Public()
@@ -128,4 +134,6 @@ export class ProductController {
   ) {
     return this.productService.deleteImage(body, id, res);
   }
+
+ 
 }
