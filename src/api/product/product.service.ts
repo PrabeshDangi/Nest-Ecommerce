@@ -11,7 +11,7 @@ import { UpdateProductDto } from './dto/updateproduct.dto';
 import { PrismaService } from 'src/global/prisma/prisma.service';
 import { ImageUploadService } from 'src/global/services/imageupload.service';
 import { HelperService } from 'src/common/helper/helper.service';
-import { SearchService } from 'src/global/elasticsearch/Search.service';
+import { SearchService } from 'src/global/elasticsearch/search.service';
 
 @Injectable()
 export class ProductService {
