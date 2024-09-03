@@ -13,15 +13,12 @@ export class SearchScheduleService {
 
   //@Cron(CronExpression.EVERY_MINUTE)
   async bulkIndexProducts() {
-    const products = await this.prisma.product.findMany({
-      include: { ratings: true },
-    });
+    const products = await this.prisma.product.findMany();
 
     const body = products.flatMap((product) => [
       { index: { _index: 'products', _id: product.id.toString() } },
       {
         title: product.title,
-        ratings: product.ratings.map((r) => r.rating),
       },
     ]);
 

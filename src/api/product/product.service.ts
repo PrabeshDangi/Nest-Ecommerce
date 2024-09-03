@@ -12,6 +12,7 @@ import { PrismaService } from 'src/global/prisma/prisma.service';
 import { ImageUploadService } from 'src/global/services/imageupload.service';
 import { HelperService } from 'src/common/helper/helper.service';
 import { SearchService } from 'src/global/elasticsearch/search.service';
+import { SearchResult } from '../../global/elasticsearch/interface/searchProduct';
 
 @Injectable()
 export class ProductService {
@@ -39,9 +40,15 @@ export class ProductService {
     };
   }
 
-  async searchProducts(query: string): Promise<Product[]> {
+  async searchProducts(query: string): Promise<SearchResult[]> {
     const results = await this.searchService.searchDocuments(query);
-    return results.map((hit) => hit._source as Product);
+    return results.map((hit) => {
+      const source = hit._source as SearchResult;
+      return {
+        id: source.id,
+        title: source.title,
+      };
+    });
   }
 
   async getNewArrival() {

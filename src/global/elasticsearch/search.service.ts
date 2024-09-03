@@ -10,8 +10,29 @@ export class SearchService {
       index: 'products',
       body: {
         query: {
-          match: {
-            title: query,
+          bool: {
+            should: [
+              {
+                match: {
+                  title: {
+                    query: query,
+                    fuzziness: 'AUTO',
+                  },
+                },
+              },
+              {
+                prefix: {
+                  title: query.toLowerCase(),
+                },
+              },
+              {
+                wildcard: {
+                  title: {
+                    value: `*${query.toLowerCase()}`,
+                  },
+                },
+              },
+            ],
           },
         },
       },

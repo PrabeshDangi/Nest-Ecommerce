@@ -25,6 +25,7 @@ import { Roles } from 'src/common/decorator/roles.decorators';
 import { Public } from 'src/common/decorator/public.decorator';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { Product } from '@prisma/client';
+import { SearchResult } from '../../global/elasticsearch/interface/searchProduct';
 
 @UseGuards(JwtGuard, RolesGuard)
 @Roles(Role.Admin)
@@ -34,17 +35,15 @@ export class ProductController {
 
   @Public()
   @Get('search')
-  async search(@Query('query') query: string): Promise<Product[]> {
+  async search(@Query('query') query: string): Promise<SearchResult[]> {
     return this.productService.searchProducts(query);
   }
-  
+
   @Public()
   @Get()
   searchProduct(@Query('q') sstring: string) {
     return this.productService.searchProduct(sstring);
   }
-
-  
 
   @Public()
   @Get('newarrival')
@@ -137,6 +136,4 @@ export class ProductController {
   ) {
     return this.productService.deleteImage(body, id, res);
   }
-
- 
 }
