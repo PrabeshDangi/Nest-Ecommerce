@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ElasticsearchModule } from '@nestjs/elasticsearch';
-import { SearchService } from './Search.service';
+import { SearchService } from './search.service';
+import * as fs from 'fs';
 @Module({
   imports: [
     ElasticsearchModule.registerAsync({
