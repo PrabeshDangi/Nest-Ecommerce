@@ -11,7 +11,7 @@ export class SearchService {
       body: {
         query: {
           match: {
-            content: query,
+            title: query,
           },
         },
       },

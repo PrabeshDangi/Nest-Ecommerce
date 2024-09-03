@@ -33,15 +33,18 @@ export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Public()
+  @Get('search')
+  async search(@Query('query') query: string): Promise<Product[]> {
+    return this.productService.searchProducts(query);
+  }
+  
+  @Public()
   @Get()
   searchProduct(@Query('q') sstring: string) {
     return this.productService.searchProduct(sstring);
   }
 
-  @Get('search')
-  async search(@Query('query') query: string): Promise<Product[]> {
-    return this.productService.searchProducts(query);
-  }
+  
 
   @Public()
   @Get('newarrival')

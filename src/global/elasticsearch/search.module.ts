@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ElasticsearchModule } from '@nestjs/elasticsearch';
 import { SearchService } from './Search.service';
-import * as fs from 'fs';
 @Module({
   imports: [
     ElasticsearchModule.registerAsync({
@@ -12,13 +11,13 @@ import * as fs from 'fs';
           password: process.env.ELASTIC_PASSWORD,
         },
         tls: {
-          rejectUnauthorized: true,
-          ca: fs.readFileSync(process.env.ELASTIC_CERT_PATH, 'utf-8'),
+          rejectUnauthorized: false,
+          //ca: fs.readFileSync(process.env.ELASTIC_CERT_PATH, 'utf-8'),
         },
       }),
     }),
   ],
   providers: [SearchService],
-  exports: [ElasticsearchModule,SearchService],
+  exports: [ElasticsearchModule, SearchService],
 })
 export class SearchModule {}
