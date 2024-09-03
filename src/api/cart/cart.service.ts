@@ -87,6 +87,12 @@ export class CartService {
           data: newCartItem,
         });
       }
+      const currentQuantity = isAlreadyInCart.quantity;
+
+      if (currentQuantity >= itemAvailable.stock) {
+        throw new BadRequestException('Item out of stock!!');
+      }
+
       await this.prisma.cart.update({
         where: { id: isAlreadyInCart.id },
         data: {
@@ -103,6 +109,11 @@ export class CartService {
           message: 'Item not found on cart!!',
         });
       }
+
+      if (isAlreadyInCart.quantity <= 1) {
+        throw new BadRequestException('Cart quantity cannot be less than 1!!');
+      }
+      
       await this.prisma.cart.update({
         where: { id: isAlreadyInCart.id },
         data: {
