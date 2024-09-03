@@ -17,6 +17,11 @@ export class FlashsaleService {
     const flashItems = await this.prisma.flashitem.findMany({
       select: {
         products: true,
+        saleEnd: true,
+        saleStart: true,
+      },
+      where: {
+        saleEnd: { gt: new Date() },
       },
     });
 
@@ -24,13 +29,20 @@ export class FlashsaleService {
       return { message: 'Flashsale not found!!' };
     }
 
-    const products = flashItems.flatMap((flashItem) => flashItem.products);
+    const responseData = flashItems.map((flashItem) => ({
+      saleStart: flashItem.saleStart,
+      saleEnd: flashItem.saleEnd,
+      products: flashItem.products,
+    }));
 
-    if (products.length === 0) {
+    if (responseData.length === 0) {
       return { message: 'No items found on flashsale!!' };
     }
 
-    return { message: 'Flash items fetched successfully', data: products };
+    return {
+      message: 'Flash items fetched successfully',
+      data: responseData,
+    };
   }
 
   async addItemToFlash(addflashdto: AddFlashDto, req: Request, res: Response) {

@@ -32,13 +32,15 @@ import { Product } from '@prisma/client';
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
+  
+  
   @Public()
   @Get()
   searchProduct(@Query('q') sstring: string) {
     return this.productService.searchProduct(sstring);
   }
 
- 
+
 
   @Public()
   @Get('newarrival')
