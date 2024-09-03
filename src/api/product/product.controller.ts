@@ -38,10 +38,7 @@ export class ProductController {
     return this.productService.searchProduct(sstring);
   }
 
-  @Get('search')
-  async search(@Query('query') query: string): Promise<Product[]> {
-    return this.productService.searchProducts(query);
-  }
+ 
 
   @Public()
   @Get('newarrival')
