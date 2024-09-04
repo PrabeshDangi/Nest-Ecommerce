@@ -24,7 +24,6 @@ import { UpdateProductDto } from './dto/updateproduct.dto';
 import { Roles } from 'src/common/decorator/roles.decorators';
 import { Public } from 'src/common/decorator/public.decorator';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { Product } from '@prisma/client';
 import { SearchResult } from '../../global/elasticsearch/interface/searchProduct';
 
 @UseGuards(JwtGuard, RolesGuard)
@@ -36,6 +35,7 @@ export class ProductController {
   @Public()
   @Get('search')
   async search(@Query('query') query: string): Promise<SearchResult[]> {
+    console.log('Hello there!!!!!!!!!!!!!!!!');
     return this.productService.searchProducts(query);
   }
 
