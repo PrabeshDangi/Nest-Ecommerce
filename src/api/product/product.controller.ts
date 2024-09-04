@@ -35,7 +35,6 @@ export class ProductController {
   @Public()
   @Get('search')
   async search(@Query('query') query: string): Promise<SearchResult[]> {
-    console.log('Hello there!!!!!!!!!!!!!!!!');
     return this.productService.searchProducts(query);
   }
 

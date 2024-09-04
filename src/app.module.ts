@@ -14,7 +14,6 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { BannerModule } from './api/banner/banner.module';
 import { EmailModule } from './global/email/email.module';
 import { RatingModule } from './api/rating/rating.module';
-import { SearchModule } from './global/elasticsearch/search.module';
 
 // global
 @Module({
@@ -36,7 +35,6 @@ import { SearchModule } from './global/elasticsearch/search.module';
     BannerModule,
     EmailModule,
     RatingModule,
-    SearchModule,
   ],
   controllers: [],
   providers: [SaleScheduler],
