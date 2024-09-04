@@ -53,7 +53,6 @@ export class EmailService {
         console.error('Error occurred while sending email:', error);
         return res.status(500).json({ message: 'Error sending email', error });
       }
-      //Intentional comment
       console.log('Email sent successfully:', info);
       return res.status(200).json({ message: 'Email sent successfully', info });
     });

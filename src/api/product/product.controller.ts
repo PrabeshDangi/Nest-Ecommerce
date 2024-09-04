@@ -24,7 +24,6 @@ import { UpdateProductDto } from './dto/updateproduct.dto';
 import { Roles } from 'src/common/decorator/roles.decorators';
 import { Public } from 'src/common/decorator/public.decorator';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { Product } from '@prisma/client';
 
 @UseGuards(JwtGuard, RolesGuard)
 @Roles(Role.Admin)
