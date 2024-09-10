@@ -37,8 +37,6 @@ export class ProductService {
     };
   }
 
-
-
   async getNewArrival() {
     const newItem = await this.prisma.product.findMany({
       orderBy: {
@@ -75,6 +73,11 @@ export class ProductService {
       },
       include: {
         categories: true,
+        banners: {
+          select: {
+            id: true,
+          },
+        },
         ratings: {
           select: {
             id: true,
@@ -89,9 +92,16 @@ export class ProductService {
       throw new NotFoundException('Product not found!!');
     }
 
+    const bannerId = product.banners.length > 0 ? product.banners[0].id : null;
+
+    const responseData = {
+      ...product,
+      bannerId,
+      banners: undefined,
+    };
     return res.status(200).json({
       message: 'Product fetched successfully!!',
-      data: product,
+      data: responseData,
     });
   }
 
