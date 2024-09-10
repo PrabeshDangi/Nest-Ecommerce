@@ -136,3 +136,40 @@ model PasswordReset {
 
   @@index([userId])
 }
+
+model Storycontent {
+  id        Int      @id @default(autoincrement())
+  title     String
+  body      String
+  image     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Service {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  icon        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Statistics {
+  id          Int      @id @default(autoincrement())
+  value       String
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Employee {
+  id        Int      @id @default(autoincrement())
+  name      String
+  position  String
+  image     String
+  twitter   String?
+  linkedin  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
