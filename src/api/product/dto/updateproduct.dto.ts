@@ -12,9 +12,6 @@ export class UpdateProductDto {
   discounttag?: boolean;
 
   @IsOptional()
-  rating?: number;
-
-  @IsOptional()
   discountprice?: number;
 
   @IsOptional()
@@ -35,4 +32,7 @@ export class UpdateProductDto {
 
   @IsOptional()
   categories?: string;
+
+  @IsOptional()
+  stock?: number;
 }

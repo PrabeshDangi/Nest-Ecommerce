@@ -33,7 +33,8 @@ export class StorycontentController {
     try {
       return await this.storycontentService.getStory();
     } catch (error) {
-      throw new Error(error);
+      console.log(error);
+      throw error;
     }
   }
 
@@ -47,7 +48,8 @@ export class StorycontentController {
     try {
       return await this.storycontentService.createStroy(file, createstorydto);
     } catch (error) {
-      throw new Error(error);
+      console.log(error);
+      throw error;
     }
   }
 
@@ -61,7 +63,8 @@ export class StorycontentController {
     try {
       return await this.storycontentService.updateStory(file, updatestorydto);
     } catch (error) {
-      throw new Error(error);
+      console.log(error);
+      throw error;
     }
   }
 }

@@ -7,14 +7,6 @@ import {
 } from 'class-validator';
 import { Size } from '@prisma/client';
 
-// export class CategoryDto {
-//   @IsNumber()
-//   id: number;
-
-//   @IsOptional()
-//   name?: string; // Optional if we are using ids for connecting existing categories
-// }
-
 export class CreateProductDto {
   @IsString()
   @IsNotEmpty()
@@ -27,9 +19,6 @@ export class CreateProductDto {
 
   @IsOptional()
   discounttag?: boolean;
-
-  @IsNotEmpty()
-  rating: number;
 
   @IsOptional()
   discountprice?: number;
@@ -52,4 +41,7 @@ export class CreateProductDto {
 
   @IsOptional()
   categories: string;
+
+  @IsNumber()
+  stock: number;
 }

@@ -7,6 +7,7 @@ import {
 import { PrismaService } from 'src/global/prisma/prisma.service';
 import { ImageUploadService } from 'src/global/services/imageupload.service';
 import { CreateServiceDTO } from './dto/createservice.dto';
+import { UpdateServiceDTO } from './dto/updateservice.dto';
 
 @Injectable()
 export class ServicesService {
@@ -42,19 +43,62 @@ export class ServicesService {
       throw new BadRequestException(' Image file is required');
     }
 
-    const iconurl=await this.uploadImageService.uploadImage(file);
+    const iconurl = await this.uploadImageService.uploadImage(file);
 
-    if(iconurl){
-        throw new BadRequestException("Image uploading error!!")
+    if (!iconurl) {
+      throw new BadRequestException('Image uploading error!!');
     }
 
-    const newService=await this.prisma.service.create({
-        data:{
-            title,
-            description,
-            icon:iconurl
-        }
-    })
-    return newService
+    const newService = await this.prisma.service.create({
+      data: {
+        title,
+        description,
+        icon: iconurl,
+      },
+    });
+    return newService;
+  }
+
+  async updateService(
+    file: Express.Multer.File,
+    id: number,
+    updateservicedto: UpdateServiceDTO,
+  ) {
+    const serviceAvailable = await this.prisma.service.findUnique({
+      where: { id },
+    });
+
+    if (!serviceAvailable) {
+      throw new NotFoundException('Service not found!!');
+    }
+
+    const updateData: any = {
+      ...updateservicedto,
+    };
+
+    if (file) {
+      const iconUrl = await this.uploadImageService.uploadImage(file);
+      updateData.icon = iconUrl;
+    }
+
+    const updatedService = await this.prisma.service.update({
+      where: { id },
+      data: updateData,
+    });
+    return updatedService;
+  }
+
+  async deleteService(id: number) {
+    const serviceAvailable = await this.prisma.service.findUnique({
+      where: { id },
+    });
+
+    if (!serviceAvailable) {
+      throw new NotFoundException('Service not found!!');
+    }
+
+    await this.prisma.service.delete({ where: { id } });
+
+    return { message: 'Service deleted sucessfully!!' };
   }
 }

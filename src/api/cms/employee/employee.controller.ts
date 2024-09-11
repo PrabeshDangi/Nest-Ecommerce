@@ -5,10 +5,10 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
   ParseIntPipe,
   Patch,
   Post,
-  Query,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -36,7 +36,8 @@ export class EmployeeController {
     try {
       return await this.employeeService.getEmployees();
     } catch (error) {
-      throw new Error(error);
+      console.log(error);
+      throw error;
     }
   }
 
@@ -50,32 +51,35 @@ export class EmployeeController {
     try {
       return await this.employeeService.createEmployee(file, createempdto);
     } catch (error) {
-      throw new Error(error);
+      console.log(error);
+      throw error;
     }
   }
 
   @HttpCode(HttpStatus.OK)
-  @Patch()
+  @Patch(":id")
   @UseInterceptors(FileInterceptor('image'))
   async updateEmployee(
     @UploadedFile() file: Express.Multer.File,
-    @Query('id', ParseIntPipe) id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateempdto: UpdateEmployeeDTO,
   ) {
     try {
       return await this.employeeService.updateEmployee(file, id, updateempdto);
     } catch (error) {
-      throw new Error(error);
+      console.log(error);
+      throw error;
     }
   }
 
   @HttpCode(HttpStatus.OK)
-  @Delete()
-  async deleteEmployee(@Query('id', ParseIntPipe) id: number) {
+  @Delete(":id")
+  async deleteEmployee(@Param('id', ParseIntPipe) id: number) {
     try {
       return await this.employeeService.deleteEmployee(id);
     } catch (error) {
-      throw new Error(error);
+      console.log(error);
+      throw error;
     }
   }
 }
