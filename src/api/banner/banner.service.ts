@@ -32,6 +32,7 @@ export class BannerService {
 
     const bannerData = bannerItems.flatMap((banner) =>
       banner.products.map((product) => ({
+        id: product.id,
         title: product.title,
         image: product.image,
         description: product.description,
