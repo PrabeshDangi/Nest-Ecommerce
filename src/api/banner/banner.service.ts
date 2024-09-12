@@ -16,6 +16,7 @@ export class BannerService {
       include: {
         products: {
           select: {
+            id: true,
             title: true,
             image: true,
             description: true,

@@ -10,11 +10,9 @@ import { CreateCouponDto, UpdateCouponDto } from './dto/coupon.dto';
 export class CouponService {
   constructor(private prisma: PrismaService) {}
 
-  async applyCoupon(userId: number, couponCode: string) {
+  async applyCoupon(userId: number, body: { couponCode: string }) {
     const couponAvailable = await this.prisma.coupon.findUnique({
-      where: {
-        code: couponCode,
-      },
+      where: { code: body.couponCode },
     });
 
     if (!couponAvailable) {
@@ -34,38 +32,45 @@ export class CouponService {
       where: {
         userId,
         couponId: couponAvailable.id,
-        isUsed: false,
+        isUsed: true,
       },
     });
 
-    if (!couponUser) {
+    if (couponUser) {
       throw new BadRequestException('Coupon already used for this user!!');
     }
 
-    await this.prisma.userCoupon.update({
-      where: { id: couponAvailable.id },
-      data: {
-        isUsed: true,
-        usedAt: new Date(),
-      },
-    });
-
-    await this.prisma.coupon.update({
-      where: {
-        id: couponAvailable.id,
-      },
-      data: {
-        currentUsageCount: {
-          increment: 1,
+    await this.prisma.$transaction(async (prisma) => {
+      await prisma.userCoupon.create({
+        data: {
+          userId,
+          couponId:couponAvailable.id,
+          isUsed: true,
+          usedAt: new Date(),
         },
-      },
+      });
+
+      await prisma.coupon.update({
+        where: {
+          id: couponAvailable.id,
+        },
+        data: {
+          currentUsageCount: {
+            increment: 1,
+          },
+        },
+      });
     });
 
     return { message: 'Coupon applied successfully!!' };
   }
 
   async getCoupons() {
-    const coupon = await this.prisma.coupon.findMany();
+    const coupon = await this.prisma.coupon.findMany({
+      where: {
+        isActive: true,
+      },
+    });
 
     if (coupon.length === 0) {
       throw new NotFoundException('Coupon not found!!');
@@ -85,29 +90,42 @@ export class CouponService {
       );
     }
 
-    const start = new Date(createcoupondto.startDate);
-    const expire = new Date(createcoupondto.expirationDate);
-    console.log(expire,start)
-
-    if(expire<new Date()){
-        throw new BadRequestException("Expiration date cannot be less than current time")
-    }
-
-    if (start && expire && start > expire) {
-      throw new BadRequestException(
-        'Start date must be before the expiration date!!',
-      );
-    }
-
     const couponData: any = {
       ...createcoupondto,
     };
 
-    const newCoupon = await this.prisma.coupon.create({
-      data: couponData,
-    });
+    if (couponData.expirationDate < new Date()) {
+      throw new BadRequestException(
+        'Expiration date cannot be less than current date!!',
+      );
+    }
 
-    return newCoupon;
+    if (couponData.startDate) {
+      if (couponData.start > couponData.expirationDate) {
+        throw new BadRequestException(
+          'Expiration date cannot be less than start date!!',
+        );
+      }
+
+      if (couponData.startDate < new Date()) {
+        throw new BadRequestException(
+          'Expiration date and start date cannot be less than current time!!',
+        );
+      }
+
+      const newCoupon = await this.prisma.coupon.create({
+        data: couponData,
+      });
+
+      return newCoupon;
+    }
+
+    return await this.prisma.coupon.create({
+      data: {
+        ...couponData,
+        startDate: new Date(),
+      },
+    });
   }
 
   async updateCoupon(id: number, updatecoupondto: UpdateCouponDto) {
@@ -119,19 +137,45 @@ export class CouponService {
       throw new NotFoundException('Coupon not found!!');
     }
 
-    if (
-      updatecoupondto.startDate &&
-      updatecoupondto.expirationDate &&
-      updatecoupondto.startDate > updatecoupondto.expirationDate
-    ) {
-      throw new BadRequestException(
-        'Start date must be before the expiration date!!',
-      );
-    }
-
     const updateData: any = {
       ...updatecoupondto,
     };
+
+    if (updateData.startDate && updateData.expirationDate) {
+      if (updateData.startDate >= updateData.expirationDate) {
+        throw new BadRequestException(
+          'Start date must be before the expiration date!!',
+        );
+      }
+    }
+
+    if (updateData.startDate) {
+      if (updateData.startDate < new Date()) {
+        throw new BadRequestException(
+          'Start date cannot be less than current date!!',
+        );
+      }
+
+      if (updateData.startDate > couponAvailable.expirationDate) {
+        throw new BadRequestException(
+          'Coupon start date cannot be greater than expiration date!!',
+        );
+      }
+    }
+
+    if (updateData.expirationDate) {
+      if (updateData.expirationDate < new Date()) {
+        throw new BadRequestException(
+          'Expiration date cannot be less than current date and time!!',
+        );
+      }
+
+      if (updateData.expirationDate < couponAvailable.startDate) {
+        throw new BadRequestException(
+          'Coupon expiration time cannot be less than start date!!',
+        );
+      }
+    }
 
     const updatedCoupon = await this.prisma.coupon.update({
       where: { id },

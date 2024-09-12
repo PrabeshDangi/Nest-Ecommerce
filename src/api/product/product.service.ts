@@ -213,7 +213,7 @@ export class ProductService {
         returnpolicy: createproductdto.returnpolicy,
         description: createproductdto.description,
         brand: createproductdto.brand,
-        stock: Number(createproductdto.stock),
+        stock: parseInt(createproductdto.stock as unknown as string),
         availability: createproductdto.availability == ('true' as unknown),
         categories: {
           connect: categoryIds.map((id) => ({ id })),

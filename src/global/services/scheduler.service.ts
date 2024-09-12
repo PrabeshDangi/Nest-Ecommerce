@@ -7,7 +7,7 @@ import { PrismaService } from '../prisma/prisma.service';
 export class SaleScheduler {
   constructor(private readonly prisma: PrismaService) {}
 
-  @Cron(CronExpression.EVERY_MINUTE)
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async handleExpiredSales() {
     const now = new Date();
 
@@ -52,6 +52,26 @@ export class SaleScheduler {
         },
         data: {
           onSale: false,
+        },
+      });
+    }
+  }
+
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  async handleExpiredCoupon() {
+    const now = new Date();
+
+    const expiredCoupon = await this.prisma.coupon.findMany({
+      where: {
+        expirationDate: { lt: now },
+      },
+    });
+
+    for (const element of expiredCoupon) {
+      await this.prisma.coupon.update({
+        where: { id: element.id },
+        data: {
+          isActive: false,
         },
       });
     }

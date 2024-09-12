@@ -1,10 +1,4 @@
-import {
-  IsString,
-  IsNumber,
-  IsOptional,
-  IsEnum,
-  IsNotEmpty,
-} from 'class-validator';
+import { IsString, IsOptional, IsEnum, IsNotEmpty } from 'class-validator';
 import { Size } from '@prisma/client';
 
 export class CreateProductDto {
@@ -42,6 +36,6 @@ export class CreateProductDto {
   @IsOptional()
   categories: string;
 
-  @IsNumber()
+  @IsNotEmpty()
   stock: number;
 }

@@ -3,6 +3,7 @@ import * as nodemailer from 'nodemailer';
 import { sendEmailDto } from './dto/sendEmail.dto';
 import { MailOptions } from 'nodemailer/lib/sendmail-transport';
 import { Response } from 'express';
+import { buildTemplate } from './Templates/emailVerification.template';
 
 @Injectable()
 export class EmailService {
@@ -62,6 +63,7 @@ export class EmailService {
     const transport = this.mailTransport();
 
     const verificationUrl = `${process.env.VERIFICATION_URL}${token}`;
+    const htmlBody = await buildTemplate(verificationUrl);
 
     const options: MailOptions = {
       from: {
@@ -69,7 +71,7 @@ export class EmailService {
         address: process.env.DEFAULT_EMAIL,
       },
       to: email,
-      html: `<b>Please verify your email by clicking on the link:</b> <a href="${verificationUrl}">${verificationUrl}</a>`,
+      html: htmlBody,
       subject: 'Email verification',
     };
 

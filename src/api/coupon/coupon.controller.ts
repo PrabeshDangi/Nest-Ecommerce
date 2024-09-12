@@ -18,6 +18,7 @@ import { JwtGuard } from '../auth/Guard/Jwt.guard';
 import { RolesGuard } from '../auth/Guard/role.guard';
 import { Roles } from 'src/common/decorator/roles.decorators';
 import { Role } from 'src/common/enums/role.enum';
+import { Public } from 'src/common/decorator/public.decorator';
 
 @UseGuards(JwtGuard, RolesGuard)
 @Controller('coupon')
@@ -27,16 +28,15 @@ export class CouponController {
   @Roles(Role.User)
   @HttpCode(HttpStatus.OK)
   @Post('apply')
-  async applyCoupon(@Req() req, @Body() couponCode: string) {
+  async applyCoupon(@Req() req, @Body() body: { couponCode: string }) {
     const user = req.user as { id: number; email: string };
     const userId = user.id;
-    return this.couponService.applyCoupon(userId, couponCode);
+    return this.couponService.applyCoupon(userId, body);
   }
 
-  @Roles(Role.Admin)
-  @HttpCode(HttpStatus.OK)
+  @Public()
   @Get()
-  async getCoupons( ) {
+  async getCoupons() {
     try {
       return await this.couponService.getCoupons();
     } catch (error) {
@@ -62,7 +62,7 @@ export class CouponController {
   @Patch(':id')
   async updateCoupon(
     @Param('id', ParseIntPipe) id: number,
-    updatecoupondto: UpdateCouponDto,
+    @Body() updatecoupondto: UpdateCouponDto,
   ) {
     try {
       return await this.couponService.updateCoupon(id, updatecoupondto);
