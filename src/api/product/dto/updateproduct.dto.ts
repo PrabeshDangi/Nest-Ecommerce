@@ -1,5 +1,5 @@
 import { Size } from '@prisma/client';
-import { IsOptional, IsEnum } from 'class-validator';
+import { IsOptional } from 'class-validator';
 
 export class UpdateProductDto {
   @IsOptional()
