@@ -63,7 +63,7 @@ model Product {
   returnpolicy  String
   description   String
   brand         String
-  availability  Boolean
+  availability  Boolean    @default(true)
   onSale        Boolean    @default(false)
   soldqunatity  Int?       @default(0)
   createdAt     DateTime   @default(now())

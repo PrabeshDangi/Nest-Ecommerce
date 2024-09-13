@@ -1,5 +1,9 @@
-import { IsString, IsOptional, IsEnum, IsNotEmpty } from 'class-validator';
-import { Size } from '@prisma/client';
+import {
+  IsString,
+  IsOptional,
+  IsNotEmpty,
+} from 'class-validator';
+import { Size } from 'src/common/enums/size.enum';
 
 export class CreateProductDto {
   @IsString()
@@ -18,8 +22,7 @@ export class CreateProductDto {
   discountprice?: number;
 
   @IsOptional()
-  @IsEnum(Size)
-  sizes?: Size;
+  sizes?: Size | null;
 
   @IsString()
   returnpolicy: string;
@@ -30,8 +33,8 @@ export class CreateProductDto {
   @IsString()
   brand: string;
 
-  @IsNotEmpty()
-  availability: boolean;
+  @IsOptional()
+  availability?: boolean;
 
   @IsOptional()
   categories: string;

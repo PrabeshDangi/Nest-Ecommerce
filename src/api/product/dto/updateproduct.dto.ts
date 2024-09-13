@@ -15,8 +15,7 @@ export class UpdateProductDto {
   discountprice?: number;
 
   @IsOptional()
-  @IsEnum(Size)
-  sizes?: Size;
+  sizes?: Size | null;
 
   @IsOptional()
   returnpolicy?: string;

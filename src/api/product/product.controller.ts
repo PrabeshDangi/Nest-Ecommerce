@@ -79,6 +79,7 @@ export class ProductController {
     @Req() req,
     @Res() res,
   ) {
+    console.log(createproductdto.sizes);
     return this.productService.addProduct(files, createproductdto, req, res);
   }
 
@@ -126,7 +127,7 @@ export class ProductController {
 
   @Delete('deleteimage/:id')
   deleteImage(
-    @Body() body: { url: string },
+    @Body() body: { index: number },
     @Param('id', ParseIntPipe) id: number,
     @Res() res,
   ) {

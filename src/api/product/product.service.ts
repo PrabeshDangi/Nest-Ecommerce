@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { CreateProductDto } from './dto/createproduct.dto';
 import { Request, Response } from 'express';
-import { Product } from '@prisma/client';
+import { Product, Size } from '@prisma/client';
 import { UpdateProductDto } from './dto/updateproduct.dto';
 import { PrismaService } from 'src/global/prisma/prisma.service';
 import { ImageUploadService } from 'src/global/services/imageupload.service';
@@ -167,19 +167,15 @@ export class ProductService {
     req: Request,
     res: Response,
   ) {
-    console.log('add project');
     const user = req.user as { id: number; email: string };
 
     if (!user) {
       throw new ForbiddenException('User not authorized!!');
     }
-    console.log(files);
 
     if (!files || files.length === 0) {
       throw new BadRequestException('At least one image file is required');
     }
-    //For the single image
-    //const imageUrl = await this.uploadImage.uploadImage(file);
 
     const imageUrls = await Promise.all(
       files.map(async (file) => {
@@ -208,13 +204,13 @@ export class ProductService {
         discountprice: parseFloat(
           createproductdto.discountprice as unknown as string,
         ),
-        discounttag: createproductdto.discounttag == ('true' as unknown),
-        sizes: createproductdto.sizes,
+        discounttag: createproductdto.discounttag || false as unknown as boolean,
+        sizes: (createproductdto.sizes as Size) || null,
         returnpolicy: createproductdto.returnpolicy,
         description: createproductdto.description,
         brand: createproductdto.brand,
         stock: parseInt(createproductdto.stock as unknown as string),
-        availability: createproductdto.availability == ('true' as unknown),
+        availability: createproductdto.availability || true,
         categories: {
           connect: categoryIds.map((id) => ({ id })),
         },
@@ -439,11 +435,11 @@ export class ProductService {
     });
   }
 
-  async deleteImage(body: { url: string }, id: number, res: Response) {
-    const { url } = body;
+  async deleteImage(body: { index: number }, id: number, res: Response) {
+    const { index } = body;
 
-    if (!url) {
-      throw new BadRequestException('Url required!!');
+    if (!index) {
+      throw new BadRequestException('Index required!!');
     }
 
     const currentItem = await this.prisma.product.findUnique({
@@ -451,17 +447,16 @@ export class ProductService {
       select: { id: true, image: true },
     });
 
-    if (!currentItem.image.includes(url)) {
-      return res.status(400).json({
-        status: false,
-        message: 'Invalid URL !!!',
-      });
+    const availableImageUrl = currentItem.image[index];
+    if (!availableImageUrl) {
+      throw new NotFoundException('Image not foundd!!');
     }
 
-    const publicId = await this.HelperService.extractPublicId(url);
+    const publicId =
+      await this.HelperService.extractPublicId(availableImageUrl);
 
     const imageRemaining = currentItem.image.filter(
-      (ImageUrl) => ImageUrl !== url,
+      (ImageUrl) => ImageUrl !== availableImageUrl,
     );
 
     const updatedProduct = await this.prisma.product.update({
@@ -473,7 +468,7 @@ export class ProductService {
 
     if (!updatedProduct) {
       throw new BadRequestException(
-        'Error updateing the image of the given product!!',
+        'Error updating the image of the given product!!',
       );
     }
 

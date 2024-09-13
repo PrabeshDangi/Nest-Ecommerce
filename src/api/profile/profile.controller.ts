@@ -41,7 +41,7 @@ export class ProfileController {
 
   @UseGuards(RolesGuard)
   @Roles(Role.Admin)
-  @Delete()
+  @Delete(':id')
   deleteUser(@Param('id', ParseIntPipe) id: number, @Req() req) {
     return this.profileService.deleteUser(id, req);
   }
