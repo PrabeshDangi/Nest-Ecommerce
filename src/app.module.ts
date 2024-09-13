@@ -16,6 +16,7 @@ import { EmailModule } from './global/email/email.module';
 import { RatingModule } from './api/rating/rating.module';
 import { CmsModule } from './api/cms/cms.module';
 import { CouponModule } from './api/coupon/coupon.module';
+import { PaymentModule } from './api/payment/payment.module';
 
 // global
 @Module({
@@ -39,6 +40,7 @@ import { CouponModule } from './api/coupon/coupon.module';
     RatingModule,
     CmsModule,
     CouponModule,
+    PaymentModule,
   ],
   controllers: [],
   providers: [SaleScheduler],
