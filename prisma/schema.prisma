@@ -59,6 +59,7 @@ model User {
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
   UserCoupon      UserCoupon[]
+  invoices        Invoice[]
 
   @@index([email])
   @@index([phone])
@@ -252,7 +253,7 @@ model PurchasedItem {
 }
 
 model Invoice {
-  id            Int           @id @default(autoincrement())
+  id            Int      @id @default(autoincrement())
   firstName     String
   lastName      String?
   country       String
@@ -260,7 +261,10 @@ model Invoice {
   postalCode    String
   phone         String
   email         String
-  user          Int
-  orderId       Int           @unique
-  order         PurchasedItem @relation(fields: [orderId], references: [id])
+  totalPrice    Float
+  orderDate     DateTime @default(now())
+  userId  Int
+  user    User          @relation(fields: [userId], references: [id])
+  orderId Int           @unique
+  order   PurchasedItem @relation(fields: [orderId], references: [id])
 }

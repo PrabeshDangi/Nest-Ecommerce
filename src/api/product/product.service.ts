@@ -204,7 +204,8 @@ export class ProductService {
         discountprice: parseFloat(
           createproductdto.discountprice as unknown as string,
         ),
-        discounttag: createproductdto.discounttag || false as unknown as boolean,
+        discounttag:
+          createproductdto.discounttag || (false as unknown as boolean),
         sizes: (createproductdto.sizes as Size) || null,
         returnpolicy: createproductdto.returnpolicy,
         description: createproductdto.description,
@@ -438,7 +439,7 @@ export class ProductService {
   async deleteImage(body: { index: number }, id: number, res: Response) {
     const { index } = body;
 
-    if (!index) {
+    if (index === undefined) {
       throw new BadRequestException('Index required!!');
     }
 
