@@ -62,7 +62,7 @@ export class PaymentService {
     return { paymentInitiate, purchasedData };
   }
 
-  async completePayment(query) {
+  async completePayment(query: unknown) {
     try {
       const paymentInfo = await this.verifyEsewaPayment(query);
 
@@ -85,6 +85,21 @@ export class PaymentService {
         },
       });
 
+      await this.prisma.invoice.update({
+        where: {
+          orderId: paymentInfo.response.transaction_uuid,
+        },
+        data: {
+          deliverystatus: 'dispatched',
+        },
+      });
+
+      const finalInvoice = await this.prisma.invoice.findUnique({
+        where: {
+          orderId: paymentInfo.response.transaction_uuid,
+        },
+      });
+
       const paymentData = await this.prisma.payment.create({
         data: {
           pidx: paymentInfo.response.transaction_code,
@@ -97,7 +112,12 @@ export class PaymentService {
         },
       });
 
-      return { success: true, message: 'Payment successful!', paymentData };
+      return {
+        success: true,
+        message: 'Payment successful!',
+        paymentData,
+        invoice: finalInvoice,
+      };
     } catch (error) {
       console.log(error);
       return error;
