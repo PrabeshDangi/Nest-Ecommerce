@@ -62,7 +62,7 @@ export class PaymentService {
     return { paymentInitiate, purchasedData };
   }
 
-  async completePayment(query: unknown) {
+  async completePayment(query: string) {
     try {
       const paymentInfo = await this.verifyEsewaPayment(query);
 

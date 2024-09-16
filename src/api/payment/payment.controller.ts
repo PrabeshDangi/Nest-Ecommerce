@@ -29,7 +29,7 @@ export class PaymentController {
   }
 
   @Get('/verify')
-  async completePayment(@Query() query: unknown) {
+  async completePayment(@Query() query: string) {
     return await this.paymentService.completePayment(query);
   }
 }
