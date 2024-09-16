@@ -35,6 +35,7 @@
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/schedule": "^4.1.0",
+    "@nestjs/throttler": "^6.2.1",
     "@prisma/client": "^5.17.0",
     "@supabase/supabase-js": "^2.45.1",
     "@types/body-parser": "^1.19.5",

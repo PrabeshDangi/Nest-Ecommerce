@@ -12,7 +12,7 @@ export class CreateProductDto {
   image?: string[];
 
   @IsOptional()
-  discounttag?: boolean;
+  discounttag?: string;
 
   @IsOptional()
   discountprice?: number;
@@ -30,7 +30,7 @@ export class CreateProductDto {
   brand: string;
 
   @IsOptional()
-  availability?: boolean;
+  availability?: string;
 
   @IsNotEmpty()
   categories: string;

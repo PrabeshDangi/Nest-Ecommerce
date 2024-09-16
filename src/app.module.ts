@@ -16,6 +16,9 @@ import { EmailModule } from './global/email/email.module';
 import { RatingModule } from './api/rating/rating.module';
 import { CmsModule } from './api/cms/cms.module';
 import { CouponModule } from './api/coupon/coupon.module';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
+import { CustomThrottlerGuard } from './common/guard/ratelimit.guard';
 
 // global
 @Module({
@@ -26,6 +29,23 @@ import { CouponModule } from './api/coupon/coupon.module';
       cache: true,
       load: [config],
     }),
+    ThrottlerModule.forRoot([
+      {
+        name: 'short',
+        ttl: 1000,
+        limit: 1,
+      },
+      {
+        name: 'medium',
+        ttl: 5000,
+        limit: 3,
+      },
+      {
+        name: 'long',
+        ttl: 10000,
+        limit: 5,
+      },
+    ]),
     ScheduleModule.forRoot(),
     PrismaModule,
     ProfileModule,
@@ -41,6 +61,11 @@ import { CouponModule } from './api/coupon/coupon.module';
     CouponModule,
   ],
   controllers: [],
-  providers: [SaleScheduler],
+  providers: [SaleScheduler,
+    {
+      provide: APP_GUARD,
+      useClass: CustomThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}
