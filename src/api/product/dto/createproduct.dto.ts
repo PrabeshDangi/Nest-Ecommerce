@@ -1,8 +1,4 @@
-import {
-  IsString,
-  IsOptional,
-  IsNotEmpty,
-} from 'class-validator';
+import { IsString, IsOptional, IsNotEmpty } from 'class-validator';
 import { Size } from 'src/common/enums/size.enum';
 
 export class CreateProductDto {
@@ -36,7 +32,7 @@ export class CreateProductDto {
   @IsOptional()
   availability?: boolean;
 
-  @IsOptional()
+  @IsNotEmpty()
   categories: string;
 
   @IsNotEmpty()

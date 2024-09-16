@@ -113,19 +113,15 @@ export class AuthService {
   }
 
   async verifyEmail(token: string, req: Request, res: Response) {
-    const verificationToken = req.cookies['email_verification_token'];
-    console.log(verificationToken);
-
-    if (!verificationToken || verificationToken !== token) {
-      throw new BadRequestException('Invalid or expired token');
+    
+    if (!token) {
+      throw new BadRequestException('Token not found!!');
     }
 
     try {
       const decodedInfo = await this.jwt.verify(token, {
         secret: process.env.JWT_SECRET,
       });
-
-      //console.log(decodedInfo);
 
       const user = await this.prisma.user.findUnique({
         where: { email: decodedInfo.email },
