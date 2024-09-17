@@ -6,6 +6,7 @@ import {
   IsEnum,
   IsOptional,
   IsDate,
+  IsNotEmpty,
 } from 'class-validator';
 
 export class CreateCouponDto {
@@ -32,6 +33,10 @@ export class CreateCouponDto {
 
   @IsNumber()
   maxUsageCount: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  minPurchaseAmount: number;
 }
 
 export class UpdateCouponDto {
@@ -68,4 +73,8 @@ export class UpdateCouponDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @IsOptional()
+  @IsNumber()
+  minPurchaseAmount?: number;
 }

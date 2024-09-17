@@ -123,7 +123,7 @@ export class CouponService {
     return await this.prisma.coupon.create({
       data: {
         ...couponData,
-        startDate: new Date(),
+        startDate: couponData.startDate ? couponData.startDate : new Date(),
       },
     });
   }
