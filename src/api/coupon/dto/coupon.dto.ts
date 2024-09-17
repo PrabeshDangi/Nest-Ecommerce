@@ -15,7 +15,7 @@ export class CreateCouponDto {
   @IsString()
   code: string;
 
-  @IsEnum(['percentage', 'fixed_Amount'])
+  @IsEnum(['percentage', 'fixed_amount'])
   type: string;
 
   @IsNumber()
@@ -44,7 +44,7 @@ export class UpdateCouponDto {
   code?: string;
 
   @IsOptional()
-  @IsEnum(['percentage', 'fixed_Amount'])
+  @IsEnum(['percentage', 'fixed_amount'])
   type?: string;
 
   @IsOptional()

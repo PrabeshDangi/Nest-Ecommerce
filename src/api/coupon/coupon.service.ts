@@ -44,7 +44,7 @@ export class CouponService {
       await prisma.userCoupon.create({
         data: {
           userId,
-          couponId:couponAvailable.id,
+          couponId: couponAvailable.id,
           isUsed: true,
           usedAt: new Date(),
         },
@@ -94,7 +94,7 @@ export class CouponService {
       ...createcoupondto,
     };
 
-    if (couponData.expirationDate < new Date()) {
+    if (couponData.expirationDate.getDay() < new Date().getDay()) {
       throw new BadRequestException(
         'Expiration date cannot be less than current date!!',
       );
@@ -107,7 +107,7 @@ export class CouponService {
         );
       }
 
-      if (couponData.startDate < new Date()) {
+      if (couponData.startDate.getDay() < new Date().getDay()) {
         throw new BadRequestException(
           'Expiration date and start date cannot be less than current time!!',
         );
@@ -150,7 +150,7 @@ export class CouponService {
     }
 
     if (updateData.startDate) {
-      if (updateData.startDate < new Date()) {
+      if (updateData.startDate.getDay() < new Date().getDay()) {
         throw new BadRequestException(
           'Start date cannot be less than current date!!',
         );
@@ -164,7 +164,7 @@ export class CouponService {
     }
 
     if (updateData.expirationDate) {
-      if (updateData.expirationDate < new Date()) {
+      if (updateData.expirationDate.getDay() < new Date().getDay()) {
         throw new BadRequestException(
           'Expiration date cannot be less than current date and time!!',
         );
