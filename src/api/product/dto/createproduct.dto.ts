@@ -9,7 +9,7 @@ export class CreateProductDto {
   @IsNotEmpty()
   price: number;
 
-  image?: string[];
+  image: string[];
 
   @IsOptional()
   discounttag?: string;

@@ -16,6 +16,7 @@ import { EmailModule } from './global/email/email.module';
 import { RatingModule } from './api/rating/rating.module';
 import { CmsModule } from './api/cms/cms.module';
 import { CouponModule } from './api/coupon/coupon.module';
+import { PaymentModule } from './api/payment/payment.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { CustomThrottlerGuard } from './common/guard/ratelimit.guard';
@@ -59,6 +60,7 @@ import { CustomThrottlerGuard } from './common/guard/ratelimit.guard';
     RatingModule,
     CmsModule,
     CouponModule,
+    PaymentModule,
   ],
   controllers: [],
   providers: [SaleScheduler,
