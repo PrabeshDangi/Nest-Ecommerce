@@ -4,7 +4,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { SignupDto } from './dto/register.dto';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { LoginDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
 import { Request, Response } from 'express';
@@ -113,7 +113,6 @@ export class AuthService {
   }
 
   async verifyEmail(token: string, req: Request, res: Response) {
-    
     if (!token) {
       throw new BadRequestException('Token not found!!');
     }

@@ -36,7 +36,7 @@ import redisClient from '../config/redisconfig';
 export class RateLimiterMiddleware implements NestMiddleware {
   private limiter = rateLimit({
     store: new redisRateLimit({
-      sendCommand: (...args) => redisClient.sendCommand(args),
+      sendCommand: (...args: any) => redisClient.sendCommand(args),
       resetExpiryOnChange: true,
     }),
     limit: 100,
