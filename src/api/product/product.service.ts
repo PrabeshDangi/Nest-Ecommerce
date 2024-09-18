@@ -232,36 +232,40 @@ export class ProductService {
     res: Response,
   ) {
     const user = req.user as { id: number; email: string };
-
+  
     if (!user) {
       throw new ForbiddenException('User not authorized!!');
     }
+  
     const categoryIds = updateproductdto.categories
       ?.split(',')
       ?.map((categoryId) => parseInt(categoryId.trim()))
       ?.filter((id) => !isNaN(id));
-
+  
     const updateData: any = {
       ...updateproductdto,
     };
-
-    // Only connect categories if they are provided
+  
     if (categoryIds && categoryIds.length > 0) {
       updateData.categories = {
-        connect: categoryIds.map((id) => ({ id })),
+        set: categoryIds.map((id) => ({ id })), // Use 'set' to override existing categories
       };
     }
-
+  
     const updatedProduct = await this.prisma.product.update({
       where: { id },
       data: updateData,
+      include:{
+        categories:true
+      }
     });
-
+  
     return res.status(200).json({
       message: 'Product updated successfully!',
       data: updatedProduct,
     });
   }
+  
 
   async deleteProduct(id: number, req: Request, res: Response) {
     const user = req.user;

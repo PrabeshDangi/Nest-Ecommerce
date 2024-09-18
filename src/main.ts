@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import * as cookieParser from 'cookie-parser';
 import * as bodyparser from 'body-parser';
+import * as compression from 'compression';
 import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
@@ -19,6 +20,7 @@ async function bootstrap() {
   );
   app.use(cookieParser());
   app.use(bodyparser.urlencoded({ extended: true }));
+  app.use(compression());
   app.enableCors({
     origin: '*',
     credentials: true,
