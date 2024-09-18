@@ -12,9 +12,6 @@ export class CreateProductDto {
   image: string[];
 
   @IsOptional()
-  discounttag?: string;
-
-  @IsOptional()
   discountprice?: number;
 
   @IsOptional()
@@ -28,9 +25,6 @@ export class CreateProductDto {
 
   @IsString()
   brand: string;
-
-  @IsOptional()
-  availability?: string;
 
   @IsNotEmpty()
   categories: string;

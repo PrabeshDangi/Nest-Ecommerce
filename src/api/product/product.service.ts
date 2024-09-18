@@ -204,14 +204,11 @@ export class ProductService {
         discountprice: parseFloat(
           createproductdto.discountprice as unknown as string,
         ),
-        discounttag:
-          createproductdto.discounttag.toLowerCase()==="true" || false ,
         sizes: (createproductdto.sizes as Size) || null,
         returnpolicy: createproductdto.returnpolicy,
         description: createproductdto.description,
         brand: createproductdto.brand,
         stock: parseInt(createproductdto.stock as unknown as string),
-        availability: createproductdto.availability.toLowerCase() === 'true', //Just to convert this to boolean
         categories: {
           connect: categoryIds.map((id) => ({ id })),
         },
