@@ -3,11 +3,11 @@ import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 export class CreateInvoiceDTO {
   @IsString()
   @IsNotEmpty()
-  firstName: string;
+  firstname: string;
 
   @IsString()
   @IsOptional()
-  lastName?: string;
+  lastname?: string;
 
   @IsString()
   @IsNotEmpty()
@@ -15,11 +15,11 @@ export class CreateInvoiceDTO {
 
   @IsString()
   @IsNotEmpty()
-  streetAddress: string;
+  streetaddress: string;
 
   @IsString()
   @IsNotEmpty()
-  postalCode: string;
+  postalcode: string;
 
   @IsString()
   @IsNotEmpty()

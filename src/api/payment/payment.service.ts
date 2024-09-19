@@ -1,65 +1,106 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/global/prisma/prisma.service';
-import { InitializePaymentDTO } from './dto/initpayment.dto';
 import axios from 'axios';
 import * as crypto from 'crypto';
-import { CreateInvoiceDTO } from './dto/create-invoice.dto';
 import { Request, Response } from 'express';
+import { InitPaymentDTO } from './dto/combined-payment.dto';
 
 @Injectable()
 export class PaymentService {
   constructor(private prisma: PrismaService) {}
 
   async initializePayment(
-    initpaymentdto: InitializePaymentDTO,
-    createinvoicedto: CreateInvoiceDTO,
+    combineddto: InitPaymentDTO,
     req: Request,
     res: Response,
   ) {
     const user = req.user as { id: number; email: string };
-    const { itemId, totalPrice } = initpaymentdto;
-    const itemData = await this.prisma.product.findMany({
-      where: {
-        id: {
-          in: itemId,
-        },
-      },
-    });
 
-    if (!itemData) {
-      throw new NotFoundException('Items not found!!');
+    if (!user) {
+      throw new ForbiddenException('User not authorized!!');
     }
 
-    const purchasedData = await this.prisma.purchasedItem.create({
-      data: {
-        item: itemId,
-        paymentMethod: 'esewa',
-        totalPrice: totalPrice,
-      },
-    });
+    const { billingInfo, itemId, totalPrice } = combineddto;
 
-    const invoiceData: any = {
-      ...createinvoicedto,
-    };
-
-    await this.prisma.invoice.create({
-      data: {
-        ...invoiceData,
-        totalPrice: purchasedData.totalPrice,
-        userId: user?.id,
-        orderId: purchasedData?.id,
-        order: {
-          connect: { id: purchasedData.id },
+    try {
+      const itemData = await this.prisma.product.findMany({
+        where: {
+          id: {
+            in: itemId,
+          },
         },
-      },
-    });
+      });
 
-    const paymentInitiate = await this.getEsewaPaymentHash({
-      amount: totalPrice,
-      transaction_uuid: purchasedData.id,
-    });
+      if (itemData.length === 0) {
+        throw new NotFoundException('Items not found!!');
+      }
 
-    return { paymentInitiate, purchasedData };
+      const itemInCart = await this.prisma.cart.findMany({
+        where: {
+          productId: {
+            in: itemId,
+          },
+          userId: user.id,
+        },
+      });
+
+      if (itemInCart.length === 0) {
+        throw new BadRequestException('Item not found on cart of this user!!');
+      }
+
+      const [purchasedData, invoiceData] = await this.prisma.$transaction([
+        this.prisma.purchasedItem.create({
+          data: {
+            item: itemId,
+            paymentMethod: 'esewa',
+            totalPrice: totalPrice,
+          },
+        }),
+        this.prisma.invoice.create({
+          data: {
+            firstName: billingInfo.firstname,
+            lastName: billingInfo.lastname,
+            country: billingInfo.country,
+            streetAddress: billingInfo.streetaddress,
+            postalCode: billingInfo.postalcode,
+            phone: billingInfo.phone,
+            email: billingInfo.email,
+            totalPrice: totalPrice,
+            userId: user.id,
+            orderId: null,
+          },
+        }),
+      ]);
+
+      await this.prisma.invoice.update({
+        where: { id: invoiceData.id },
+        data: {
+          orderId: purchasedData.id,
+        },
+      });
+      await this.prisma.invoice.update({
+        where: { id: invoiceData.id },
+        data: {
+          order: {
+            connect: { id: purchasedData.id },
+          },
+        },
+      });
+
+      const paymentInitiate = await this.getEsewaPaymentHash({
+        amount: totalPrice,
+        transaction_uuid: purchasedData.id,
+      });
+
+      return res.json({ paymentInitiate, purchasedData });
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   async completePayment(query: string) {
