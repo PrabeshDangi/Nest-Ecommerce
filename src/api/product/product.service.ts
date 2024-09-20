@@ -50,21 +50,34 @@ export class ProductService {
 
   async getAllProducts(res: Response) {
     const products = await this.prisma.product.findMany({
-      include: {
-        categories: true,
-      },
+        include: {
+            categories: true,
+            ratings: {
+                select: {
+                    rating: true,
+                    comment: true
+                }
+            },
+        },
     });
 
-    if (products.length === 0) {
-      throw new NotFoundException('No products found!!');
-    }
+    const productsWithRatings = products.map(product => {
+        const ratings = product.ratings;
+        const totalRatings = ratings.length;
 
-    return res.status(200).json({
-      message: 'Products fetched successfully!!',
-      count: products.length,
-      data: products,
+        const averageRating = totalRatings > 0 
+            ? ratings.reduce((sum, r) => sum + r.rating, 0) / totalRatings 
+            : 0;
+
+        return {
+            ...product,
+            totalRatings,
+            averageRating: parseFloat(averageRating.toFixed(2)) 
+        };
     });
-  }
+
+    res.json(productsWithRatings);
+}
 
   async getProduct(id: number, res: Response) {
     const product = await this.prisma.product.findUnique({
@@ -232,40 +245,39 @@ export class ProductService {
     res: Response,
   ) {
     const user = req.user as { id: number; email: string };
-  
+
     if (!user) {
       throw new ForbiddenException('User not authorized!!');
     }
-  
+
     const categoryIds = updateproductdto.categories
       ?.split(',')
       ?.map((categoryId) => parseInt(categoryId.trim()))
       ?.filter((id) => !isNaN(id));
-  
+
     const updateData: any = {
       ...updateproductdto,
     };
-  
+
     if (categoryIds && categoryIds.length > 0) {
       updateData.categories = {
         set: categoryIds.map((id) => ({ id })), // Use 'set' to override existing categories
       };
     }
-  
+
     const updatedProduct = await this.prisma.product.update({
       where: { id },
       data: updateData,
-      include:{
-        categories:true
-      }
+      include: {
+        categories: true,
+      },
     });
-  
+
     return res.status(200).json({
       message: 'Product updated successfully!',
       data: updatedProduct,
     });
   }
-  
 
   async deleteProduct(id: number, req: Request, res: Response) {
     const user = req.user;
