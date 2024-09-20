@@ -7,7 +7,7 @@ import {
 import { Request, Response } from 'express';
 import { updateDto } from './dto/updateProfile.dto';
 import { changePasswordDto } from './dto/changePassword.dto';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { PrismaService } from 'src/global/prisma/prisma.service';
 import { forgotPasswordDTO } from './dto/forgotPassword.dto';
 import { HelperService } from 'src/common/helper/helper.service';
