@@ -50,45 +50,40 @@ export class PaymentService {
       });
 
       if (itemInCart.length === 0) {
-        throw new BadRequestException('Item not found on cart of this user!!');
+        throw new BadRequestException(
+          'These items are not present on the cart of this user!!',
+        );
       }
 
-      const [purchasedData, invoiceData] = await this.prisma.$transaction([
-        this.prisma.purchasedItem.create({
-          data: {
-            item: itemId,
-            paymentMethod: 'esewa',
-            totalPrice: totalPrice,
-          },
-        }),
-        this.prisma.invoice.create({
-          data: {
-            firstName: billingInfo.firstname,
-            lastName: billingInfo.lastname,
-            country: billingInfo.country,
-            streetAddress: billingInfo.streetaddress,
-            postalCode: billingInfo.postalcode,
-            phone: billingInfo.phone,
-            email: billingInfo.email,
-            totalPrice: totalPrice,
-            userId: user.id,
-            orderId: null,
-          },
-        }),
-      ]);
-
-      await this.prisma.invoice.update({
-        where: { id: invoiceData.id },
+      const purchasedData = await this.prisma.purchasedItem.create({
         data: {
+          item: itemId,
+          paymentMethod: 'esewa',
+          totalPrice: totalPrice,
+        },
+      });
+
+      const invoiceData = await this.prisma.invoice.create({
+        data: {
+          firstName: billingInfo.firstname,
+          lastName: billingInfo.lastname,
+          country: billingInfo.country,
+          streetAddress: billingInfo.streetaddress,
+          postalCode: billingInfo.postalcode,
+          phone: billingInfo.phone,
+          email: billingInfo.email,
+          totalPrice: totalPrice,
+          userId: user.id,
           orderId: purchasedData.id,
         },
       });
-      await this.prisma.invoice.update({
-        where: { id: invoiceData.id },
+
+      const purchasedProduct = await this.prisma.purchasedItem.update({
+        where: {
+          id: purchasedData.id,
+        },
         data: {
-          order: {
-            connect: { id: purchasedData.id },
-          },
+          invoiceId: invoiceData.id,
         },
       });
 
@@ -97,9 +92,10 @@ export class PaymentService {
         transaction_uuid: purchasedData.id,
       });
 
-      return res.json({ paymentInitiate, purchasedData });
+      return res.json({ paymentInitiate, purchasedProduct });
     } catch (error) {
       console.log(error);
+      throw new Error(error);
     }
   }
 
@@ -185,7 +181,7 @@ export class PaymentService {
     }
   }
 
-  private async verifyEsewaPayment(encodedData) {
+  private async verifyEsewaPayment(encodedData: string) {
     try {
       const decodedData = await JSON.parse(encodedData);
       let headersList = {

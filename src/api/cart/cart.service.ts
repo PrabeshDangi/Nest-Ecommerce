@@ -39,6 +39,7 @@ export class CartService {
     if (userWithCart.cart.length === 0) {
       return res.status(404).json({
         message: 'Cart item not found for this user!!',
+        data: [],
       });
     }
 
@@ -113,7 +114,7 @@ export class CartService {
       if (isAlreadyInCart.quantity <= 1) {
         throw new BadRequestException('Cart quantity cannot be less than 1!!');
       }
-      
+
       await this.prisma.cart.update({
         where: { id: isAlreadyInCart.id },
         data: {
