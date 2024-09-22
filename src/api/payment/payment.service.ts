@@ -9,18 +9,20 @@ import axios from 'axios';
 import * as crypto from 'crypto';
 import { Request, Response } from 'express';
 import { InitPaymentDTO } from './dto/combined-payment.dto';
-import { v4 as uuidv4 } from 'uuid';
+import { HelperService } from 'src/common/helper/helper.service';
 
 @Injectable()
 export class PaymentService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private helperservice: HelperService,
+  ) {}
 
   async initializePayment(
     combineddto: InitPaymentDTO,
     req: Request,
     res: Response,
   ) {
-    const testUUID = uuidv4();
     const user = req.user as { id: number; email: string };
 
     if (!user) {
@@ -89,16 +91,18 @@ export class PaymentService {
         },
       });
 
+      const Uuid = await this.helperservice.encodeToUUID(purchasedData.id);
+
       const paymentInitiate = await this.getEsewaPaymentHash({
         amount: totalPrice,
         //transaction_uuid: purchasedData.id,
-        transaction_uuid: testUUID,
+        transaction_uuid: Uuid,
       });
 
       return res.json({
         paymentInitiate,
         purchasedProduct,
-        transaction_uuid: testUUID,
+        transaction_uuid: Uuid,
       });
     } catch (error) {
       console.log(error);
@@ -106,13 +110,18 @@ export class PaymentService {
     }
   }
 
-  async completePayment(query: string) {
+  async completePayment(query: string, res: Response) {
     try {
       const paymentInfo = await this.verifyEsewaPayment(query);
+      console.log(paymentInfo);
+
+      const ItemId = await this.helperservice.decodeFromUUID(
+        paymentInfo.response.transaction_uuid,
+      );
 
       const purchasedItemData = await this.prisma.purchasedItem.findUnique({
         where: {
-          id: paymentInfo.response.transaction_uuid,
+          id: ItemId,
         },
       });
 
@@ -122,7 +131,7 @@ export class PaymentService {
 
       await this.prisma.purchasedItem.update({
         where: {
-          id: paymentInfo.response.transaction_uuid,
+          id: ItemId,
         },
         data: {
           status: 'success',
@@ -131,37 +140,26 @@ export class PaymentService {
 
       await this.prisma.invoice.update({
         where: {
-          orderId: paymentInfo.response.transaction_uuid,
+          orderId: ItemId,
         },
         data: {
           deliverystatus: 'dispatched',
         },
       });
 
-      const finalInvoice = await this.prisma.invoice.findUnique({
-        where: {
-          orderId: paymentInfo.response.transaction_uuid,
-        },
-      });
-
-      const paymentData = await this.prisma.payment.create({
+      await this.prisma.payment.create({
         data: {
           pidx: paymentInfo.response.transaction_code,
           transactionId: paymentInfo.response.transaction_code,
-          productId: paymentInfo.response.transaction_uuid,
+          productId: ItemId,
           amount: purchasedItemData.totalPrice,
           dataFromVerificationReq: paymentInfo,
           paymentGateway: 'esewa',
-          status: 'pending',
+          status: 'success',
         },
       });
 
-      return {
-        success: true,
-        message: 'Payment successful!',
-        paymentData,
-        invoice: finalInvoice,
-      };
+      return res.redirect('https://exlcusive.vercel.app/order-placed');
     } catch (error) {
       console.log(error);
       return error;
@@ -204,7 +202,7 @@ export class PaymentService {
         .update(data)
         .digest('base64');
 
-        //Intended comment
+      //Intended comment
       //console.log(hash);
       //console.log(decodedData.signature);
       let reqOptions = {
@@ -228,5 +226,19 @@ export class PaymentService {
       console.log(error);
       throw error;
     }
+  }
+
+  async getMyInvoices(userId: number) {
+    const myInvoices = await this.prisma.invoice.findMany({
+      where: {
+        userId: userId,
+      },
+    });
+
+    if (myInvoices.length === 0) {
+      throw new NotFoundException('Invoices not found for this user!!');
+    }
+
+    return { myInvoices };
   }
 }

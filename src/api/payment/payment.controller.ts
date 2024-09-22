@@ -1,7 +1,10 @@
 import {
   Body,
   Controller,
+  ForbiddenException,
   Get,
+  HttpCode,
+  HttpStatus,
   Post,
   Query,
   Req,
@@ -26,7 +29,6 @@ export class PaymentController {
     @Req() req,
     @Res() res,
   ) {
-    
     try {
       const result = await this.paymentService.initializePayment(
         combineddto,
@@ -42,7 +44,25 @@ export class PaymentController {
   }
 
   @Get('/verify')
-  async completePayment(@Query() query: string) {
-    return await this.paymentService.completePayment(query);
+  async completePayment(@Query() query: string, @Res() res) {
+    return await this.paymentService.completePayment(query, res);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(Role.User)
+  @Get('invoices')
+  async getMyInvoices(@Req() req, @Res() res) {
+    try {
+      const user = req.user as { id: number; email: string };
+      if (!user) {
+        throw new ForbiddenException('User not authorized!!');
+      }
+      const result = await this.paymentService.getMyInvoices(user.id);
+      return { result };
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   }
 }
