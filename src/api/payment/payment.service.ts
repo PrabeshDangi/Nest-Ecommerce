@@ -159,7 +159,7 @@ export class PaymentService {
         },
       });
 
-      return res.redirect('https://exlcusive.vercel.app/order-placed');
+      return res.redirect('https://exclusivenp.vercel.app/order-placed');
     } catch (error) {
       console.log(error);
       return error;
