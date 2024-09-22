@@ -9,6 +9,7 @@ import axios from 'axios';
 import * as crypto from 'crypto';
 import { Request, Response } from 'express';
 import { InitPaymentDTO } from './dto/combined-payment.dto';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class PaymentService {
@@ -19,6 +20,7 @@ export class PaymentService {
     req: Request,
     res: Response,
   ) {
+    const testUUID = uuidv4();
     const user = req.user as { id: number; email: string };
 
     if (!user) {
@@ -89,10 +91,15 @@ export class PaymentService {
 
       const paymentInitiate = await this.getEsewaPaymentHash({
         amount: totalPrice,
-        transaction_uuid: purchasedData.id,
+        //transaction_uuid: purchasedData.id,
+        transaction_uuid: testUUID,
       });
 
-      return res.json({ paymentInitiate, purchasedProduct });
+      return res.json({
+        paymentInitiate,
+        purchasedProduct,
+        transaction_uuid: testUUID,
+      });
     } catch (error) {
       console.log(error);
       throw new Error(error);
@@ -197,8 +204,9 @@ export class PaymentService {
         .update(data)
         .digest('base64');
 
-      console.log(hash);
-      console.log(decodedData.signature);
+        //Intended comment
+      //console.log(hash);
+      //console.log(decodedData.signature);
       let reqOptions = {
         url: `${process.env.ESEWA_GATEWAY_URL}/api/epay/transaction/status/?product_code=${process.env.ESEWA_PRODUCT_CODE}&total_amount=${decodedData.total_amount}&transaction_uuid=${decodedData.transaction_uuid}`,
         method: 'GET',
