@@ -50,34 +50,40 @@ export class ProductService {
 
   async getAllProducts(res: Response) {
     const products = await this.prisma.product.findMany({
-        include: {
-            categories: true,
-            ratings: {
-                select: {
-                    rating: true,
-                    comment: true
-                }
-            },
+      include: {
+        categories: true,
+        banners: {
+          select: {
+            id: true,
+          },
         },
+        ratings: {
+          select: {
+            rating: true,
+            comment: true,
+          },
+        },
+      },
     });
 
-    const productsWithRatings = products.map(product => {
-        const ratings = product.ratings;
-        const totalRatings = ratings.length;
+    const productsWithRatings = products.map((product) => {
+      const ratings = product.ratings;
+      const totalRatings = ratings.length;
 
-        const averageRating = totalRatings > 0 
-            ? ratings.reduce((sum, r) => sum + r.rating, 0) / totalRatings 
-            : 0;
+      const averageRating =
+        totalRatings > 0
+          ? ratings.reduce((sum, r) => sum + r.rating, 0) / totalRatings
+          : 0;
 
-        return {
-            ...product,
-            totalRatings,
-            averageRating: parseFloat(averageRating.toFixed(2)) 
-        };
+      return {
+        ...product,
+        totalRatings,
+        averageRating: parseFloat(averageRating.toFixed(2)),
+      };
     });
 
     res.json(productsWithRatings);
-}
+  }
 
   async getProduct(id: number, res: Response) {
     const product = await this.prisma.product.findUnique({

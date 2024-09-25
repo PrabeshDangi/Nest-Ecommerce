@@ -113,7 +113,6 @@ export class PaymentService {
   async completePayment(query: string, res: Response) {
     try {
       const paymentInfo = await this.verifyEsewaPayment(query);
-      console.log(paymentInfo);
 
       const ItemId = await this.helperservice.decodeFromUUID(
         paymentInfo.response.transaction_uuid,

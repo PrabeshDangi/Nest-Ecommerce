@@ -44,7 +44,7 @@ export class PaymentController {
   }
 
   @Get('/verify')
-  async completePayment(@Query() query: string, @Res() res) {
+  async completePayment(@Query('data') query: string, @Res() res) {
     return await this.paymentService.completePayment(query, res);
   }
 
@@ -59,7 +59,7 @@ export class PaymentController {
         throw new ForbiddenException('User not authorized!!');
       }
       const result = await this.paymentService.getMyInvoices(user.id);
-      return { result };
+      return  res.json({result}) ;
     } catch (error) {
       console.log(error);
       throw error;
