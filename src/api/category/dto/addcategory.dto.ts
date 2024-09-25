@@ -1,6 +1,9 @@
-import { IsString } from 'class-validator';
+import { IsString, Matches } from 'class-validator';
 
-export class addCategoryDto {
+export class AddCategoryDto {
   @IsString()
+  @Matches(/^[a-zA-Z0-9\s]+$/, {
+    message: 'Name can only contain letters, numbers, and spaces',
+  })
   name: string;
 }

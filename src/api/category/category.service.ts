@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { PrismaService } from 'src/global/prisma/prisma.service';
-import { addCategoryDto } from './dto/addcategory.dto';
+import { AddCategoryDto } from './dto/addcategory.dto';
 
 @Injectable()
 export class CategoryService {
@@ -25,7 +25,7 @@ export class CategoryService {
   }
 
   async addCategory(
-    addcaetegorydto: addCategoryDto,
+    addcaetegorydto: AddCategoryDto,
     req: Request,
     res: Response,
   ) {
@@ -75,7 +75,7 @@ export class CategoryService {
 
   async updateCategory(
     id: number,
-    updatedto: addCategoryDto,
+    updatedto: AddCategoryDto,
     req: Request,
     res: Response,
   ) {
