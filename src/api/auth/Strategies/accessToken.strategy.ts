@@ -1,39 +1,38 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Request } from 'express';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from 'src/global/prisma/prisma.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(private prisma: PrismaService) {
+export class AtStrategy extends PassportStrategy(Strategy, 'jwt') {
+  constructor(
+    private prisma: PrismaService,
+    private jwt: JwtService,
+  ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
-        JwtStrategy.extractJWT,
+        AtStrategy.extractJWT,
         ExtractJwt.fromAuthHeaderAsBearerToken(),
       ]),
-      secretOrKey: process.env.JWT_SECRET,
+      secretOrKey: process.env.ACCESS_SECRET,
     });
   }
 
   private static extractJWT(req: Request): string | null {
-    const tokenFromCookie = req.cookies?.token;
+    const tokenFromCookie = req.cookies?.access_token;
     const tokenFromHeader = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
-    if (!(tokenFromCookie || tokenFromHeader)) {
-      return null;
-    }
-
-    return tokenFromCookie || tokenFromHeader;
+    return tokenFromCookie || tokenFromHeader || null;
   }
 
-  async validate(payload: { id: number; email: string }) {
+  async validate(payload: any) {
     if (!payload) {
       throw new UnauthorizedException('Invalid JWT payload');
     }
 
     const user = await this.prisma.user.findUnique({
       where: { id: payload.id },
-      select: { id: true, email: true, role: true },
     });
 
     if (!user) {

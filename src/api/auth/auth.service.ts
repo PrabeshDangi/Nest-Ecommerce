@@ -8,9 +8,12 @@ import * as bcrypt from 'bcryptjs';
 import { LoginDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
 import { Request, Response } from 'express';
-import { cookieOptions } from 'src/constant';
 import { PrismaService } from 'src/global/prisma/prisma.service';
 import { EmailService } from 'src/global/email/email.service';
+import {
+  accessTokenOption,
+  refreshTokenOption,
+} from 'src/global/Constants/cookie.option';
 
 @Injectable()
 export class AuthService {
@@ -43,7 +46,9 @@ export class AuthService {
       },
     });
 
-    const verificationToken = await this.generateToken(newuser.email);
+    const verificationToken = await this.generateEmailVerificationToken(
+      newuser.email,
+    );
 
     await this.emailService.sendVerificationEmail(
       newuser.email,
@@ -57,7 +62,6 @@ export class AuthService {
         sameSite: 'lax',
         maxAge: 2 * 60 * 1000,
       })
-      .status(200)
       .json({
         message: 'Please verify your email',
         data: newuser,
@@ -84,36 +88,36 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const token = await this.signToken({
+    const { accessToken, refreshToken } = await this.signTokens({
       id: userAvailable.id,
-      email: userAvailable.email,
+      name: userAvailable.name,
+      role: userAvailable.role,
     });
 
-    if (!token) {
-      throw new BadRequestException('token not available!!');
-    }
-
-    res.status(200).cookie('token', token, cookieOptions).json({
-      message: 'User logged in successfully!!',
-      token,
-    });
+    res
+      .cookie('refresh_token', refreshToken, refreshTokenOption)
+      .cookie('access_token', accessToken, accessTokenOption)
+      .json({
+        message: 'User logged in successfully!!',
+        accessToken,
+        refreshToken,
+      });
   }
 
   async SignoutUser(res: Response) {
     try {
       res.clearCookie('token');
-      return res.status(200).json({
+      return res.json({
         message: 'User logged out successfully!!',
       });
     } catch (error) {
-      return res.status(400).json({
+      return res.json({
         message: 'Internal server error.',
       });
     }
   }
 
   async verifyEmail(token: string, req: Request, res: Response) {
-    
     if (!token) {
       throw new BadRequestException('Token not found!!');
     }
@@ -138,7 +142,7 @@ export class AuthService {
         },
       });
 
-      res.clearCookie('email_verification_token').status(200).json({
+      res.clearCookie('email_verification_token').json({
         message: 'Email verifies successfully!!',
       });
     } catch (error) {
@@ -147,24 +151,73 @@ export class AuthService {
     }
   }
 
-  async hashPassword(password: string) {
+  async refreshToken(req: Request) {
+    const incomingrefreshToken = req.cookies.refresh_token;
+
+    if (!incomingrefreshToken) {
+      throw new UnauthorizedException('Refresh token not found');
+    }
+
+    try {
+      const decodedToken = await this.jwt.verify(incomingrefreshToken, {
+        secret: process.env.REFRESH_SECRET,
+      });
+
+      const user = await this.prisma.user.findUnique({
+        where: { id: decodedToken.id },
+      });
+
+      if (!user) {
+        throw new UnauthorizedException('Invalid refresh token!!');
+      }
+
+      const { accessToken, refreshToken } = await this.signTokens({
+        id: decodedToken.id,
+        name: decodedToken.name,
+        role: decodedToken.role,
+      });
+
+      return {
+        accessToken,
+        refreshToken,
+      };
+    } catch (error) {
+      throw new BadRequestException('Invalid token!!');
+    }
+  }
+
+  private async hashPassword(password: string) {
     const saltRound = 10;
     return await bcrypt.hash(password, saltRound);
   }
 
-  async checkPassword(password: string, hash: string) {
+  private async checkPassword(password: string, hash: string) {
     return bcrypt.compare(password, hash);
   }
 
-  async signToken(args: { id: number; email: string }) {
-    const payload = args;
+  async signTokens(args: { id: number; name: string; role: string }) {
+    const { id, name, role } = args;
+    const accessToken = await this.generateAccessToken({ id, role });
+    const refreshToken = await this.generateRefreshToken({ id, name });
+
+    return { accessToken, refreshToken };
+  }
+
+  private async generateAccessToken(payload: { id: number; role: string }) {
     return this.jwt.sign(payload, {
-      secret: process.env.JWT_SECRET,
-      expiresIn: process.env.JWT_EXPIRATION,
+      secret: process.env.ACCESS_SECRET,
+      expiresIn: process.env.ACCESS_EXPIRY,
     });
   }
 
-  async generateToken(email: string) {
+  private async generateRefreshToken(payload: { id: number; name: string }) {
+    return this.jwt.sign(payload, {
+      secret: process.env.REFRESH_SECRET,
+      expiresIn: process.env.REFRESH_EXPIRY,
+    });
+  }
+
+  private async generateEmailVerificationToken(email: string) {
     return this.jwt.sign(
       { email },
       { secret: process.env.JWT_SECRET, expiresIn: '2m' },

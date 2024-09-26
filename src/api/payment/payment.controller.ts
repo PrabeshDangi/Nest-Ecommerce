@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { InitPaymentDTO } from './dto/combined-payment.dto';
-import { JwtGuard } from '../auth/Guard/Jwt.guard';
+import { JwtGuard } from '../auth/Guard/Access.guard';
 import { RolesGuard } from '../auth/Guard/role.guard';
 import { Roles } from 'src/common/decorator/roles.decorators';
 import { Role } from 'src/common/enums/role.enum';
@@ -59,7 +59,7 @@ export class PaymentController {
         throw new ForbiddenException('User not authorized!!');
       }
       const result = await this.paymentService.getMyInvoices(user.id);
-      return  res.json({result}) ;
+      return res.json({ result });
     } catch (error) {
       console.log(error);
       throw error;
