@@ -1,31 +1,27 @@
-# services:
-#   nest-backend:
-#     build:
-#       context: .
-#       dockerfile: Dockerfile
-#     env_file:
-#       - .env
-#     volumes:
-#       - .:/app
-#     ports:
-#       - '3000:3000'
+version: '3.8'
 
 services:
   nest-app:
+    container_name: nest-app
     build:
       context: .
       dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
     networks:
       - app-network
+    init: true
 
   nginx:
+    container_name: nginx
     build:
       context: ./nginx
       dockerfile: Dockerfile
-    ports:
-      - '80:80'
     networks:
       - app-network
+    ports:
+      - '80:80'
+    init: true
 
 networks:
   app-network:
