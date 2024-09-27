@@ -1,9 +1,10 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { ProductController } from './product.controller';
 import { PrismaModule } from 'src/global/prisma/prisma.module';
 import { ImageUploadService } from 'src/global/services/imageupload.service';
 import { HelperService } from 'src/common/helper/helper.service';
+import { RateLimiterMiddleware } from 'src/common/middlewares/ratelimiting.middleware';
 
 
 @Module({
@@ -15,4 +16,11 @@ import { HelperService } from 'src/common/helper/helper.service';
     HelperService,
   ],
 })
-export class ProductModule {}
+//export class ProductModule {}
+export class ProductModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(RateLimiterMiddleware)
+      .forRoutes('*');
+  }
+}

@@ -1,3 +1,32 @@
+# version: '3.8'
+
+# services:
+#   nest-app:
+#     container_name: nest-app
+#     build:
+#       context: .
+#       dockerfile: Dockerfile
+#     ports:
+#       - '3000:3000'
+#     networks:
+#       - app-network
+#     init: true
+
+#   nginx:
+#     container_name: nginx
+#     build:
+#       context: ./nginx
+#       dockerfile: Dockerfile
+#     networks:
+#       - app-network
+#     ports:
+#       - '80:80'
+#     init: true
+
+# networks:
+#   app-network:
+#     driver: bridge
+
 version: '3.8'
 
 services:

@@ -30,23 +30,6 @@ import { CustomThrottlerGuard } from './common/guard/ratelimit.guard';
       cache: true,
       load: [config],
     }),
-    ThrottlerModule.forRoot([
-      {
-        name: 'short',
-        ttl: 1000,
-        limit: 1,
-      },
-      {
-        name: 'medium',
-        ttl: 5000,
-        limit: 3,
-      },
-      {
-        name: 'long',
-        ttl: 10000,
-        limit: 5,
-      },
-    ]),
     ScheduleModule.forRoot(),
     PrismaModule,
     ProfileModule,
@@ -63,11 +46,12 @@ import { CustomThrottlerGuard } from './common/guard/ratelimit.guard';
     PaymentModule,
   ],
   controllers: [],
-  providers: [SaleScheduler,
-    {
-      provide: APP_GUARD,
-      useClass: CustomThrottlerGuard,
-    },
+  providers: [
+    SaleScheduler,
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: CustomThrottlerGuard,
+    // },
   ],
 })
 export class AppModule {}

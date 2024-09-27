@@ -3,11 +3,8 @@ FROM node:18-alpine
 WORKDIR /app
 
 COPY package*.json ./
-COPY . .
 RUN npm install
-# ENV PORT=3000
-EXPOSE 3000
-
+COPY . .
 RUN npx prisma generate
-
+EXPOSE 3000
 CMD ["npm", "run", "start:dev"]

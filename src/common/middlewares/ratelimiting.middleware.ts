@@ -1,36 +1,9 @@
-// import { Request, Response, NextFunction } from 'express';
-// import rateLimit from 'express-rate-limit';
-// import redisRateLimit from 'rate-limit-redis';
-// import redisClient from '../config/redisconfig';
-
-// const limiter = rateLimit({
-//   store: new redisRateLimit({
-//     sendCommand: (...args) => redisClient.sendCommand(args),
-//     resetExpiryOnChange: true,
-//   }),
-//   limit: 100,
-//   message: 'Too many requests from this IP, please try again later',
-//   keyGenerator: (req: Request) => {
-//     return (
-//       req.connection.remoteAddress || (req.headers['x-forwarded-for'] as string)
-//     );
-//   },
-//   windowMs: 60 * 60 * 1000,
-// });
-
-// export const rateLimiterMiddleware = (
-//   req: Request,
-//   res: Response,
-//   next: NextFunction,
-// ) => {
-//   return limiter(req, res, next);
-// };
-
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import rateLimit from 'express-rate-limit';
 import redisRateLimit from 'rate-limit-redis';
 import redisClient from '../config/redisconfig';
+
 
 @Injectable()
 export class RateLimiterMiddleware implements NestMiddleware {
@@ -39,21 +12,28 @@ export class RateLimiterMiddleware implements NestMiddleware {
       sendCommand: (...args: any) => redisClient.sendCommand(args),
       resetExpiryOnChange: true,
     }),
-    limit: 100,
-    message: 'Too many requests from this IP, please try again later',
+    
+    windowMs:2*1000,
+    limit:3,
+    message: 'Too many requests from this IP, please try again later.',
+
     keyGenerator: (req: Request) => {
-      console.log(req.headers['x-forwarded-for'] as string);
+      const xForwardedFor = req.headers['x-forwarded-for'];
+
+      let realIP = '';
+      if (typeof xForwardedFor === 'string') {
+        realIP = xForwardedFor.split(',')[0].trim(); // First Ip extract grana lako!!
+      } else {
+        realIP =
+          req.headers['x-real-ip']?.[0] || req.connection.remoteAddress || '';
+      }
       
-      return (
-        req.connection.remoteAddress ||
-        (req.headers['x-forwarded-for'] as string)
-      );
+
+      return realIP.replace(/^::ffff:/, ''); // Optional: To remove IPv6 prefix if IPv4 is neeeded
     },
-    windowMs: 60 * 60 * 1000,
   });
 
   use(req: Request, res: Response, next: NextFunction): void {
-    console.log('Applyng rate limiter!!');
 
     this.limiter(req, res, next);
   }
