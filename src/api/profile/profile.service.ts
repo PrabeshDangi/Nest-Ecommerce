@@ -38,6 +38,7 @@ export class ProfileService {
         email: true,
         role: true,
         phone: true,
+        isEmailVerified: true,
       },
     });
 

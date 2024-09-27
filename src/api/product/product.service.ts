@@ -52,18 +52,37 @@ export class ProductService {
     const products = await this.prisma.product.findMany({
       include: {
         categories: true,
+        banners: {
+          select: {
+            id: true,
+          },
+        },
+        ratings: {
+          select: {
+            rating: true,
+            comment: true,
+          },
+        },
       },
     });
 
-    if (products.length === 0) {
-      throw new NotFoundException('No products found!!');
-    }
+    const productsWithRatings = products.map((product) => {
+      const ratings = product.ratings;
+      const totalRatings = ratings.length;
 
-    return res.status(200).json({
-      message: 'Products fetched successfully!!',
-      count: products.length,
-      data: products,
+      const averageRating =
+        totalRatings > 0
+          ? ratings.reduce((sum, r) => sum + r.rating, 0) / totalRatings
+          : 0;
+
+      return {
+        ...product,
+        totalRatings,
+        averageRating: parseFloat(averageRating.toFixed(2)),
+      };
     });
+
+    res.json(productsWithRatings);
   }
 
   async getProduct(id: number, res: Response) {
@@ -204,14 +223,11 @@ export class ProductService {
         discountprice: parseFloat(
           createproductdto.discountprice as unknown as string,
         ),
-        discounttag:
-          createproductdto.discounttag || (false as unknown as boolean),
         sizes: (createproductdto.sizes as Size) || null,
         returnpolicy: createproductdto.returnpolicy,
         description: createproductdto.description,
         brand: createproductdto.brand,
         stock: parseInt(createproductdto.stock as unknown as string),
-        availability: createproductdto.availability || true,
         categories: {
           connect: categoryIds.map((id) => ({ id })),
         },
@@ -239,6 +255,7 @@ export class ProductService {
     if (!user) {
       throw new ForbiddenException('User not authorized!!');
     }
+
     const categoryIds = updateproductdto.categories
       ?.split(',')
       ?.map((categoryId) => parseInt(categoryId.trim()))
@@ -248,16 +265,18 @@ export class ProductService {
       ...updateproductdto,
     };
 
-    // Only connect categories if they are provided
     if (categoryIds && categoryIds.length > 0) {
       updateData.categories = {
-        connect: categoryIds.map((id) => ({ id })),
+        set: categoryIds.map((id) => ({ id })), // Use 'set' to override existing categories
       };
     }
 
     const updatedProduct = await this.prisma.product.update({
       where: { id },
       data: updateData,
+      include: {
+        categories: true,
+      },
     });
 
     return res.status(200).json({

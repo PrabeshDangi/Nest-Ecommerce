@@ -9,10 +9,7 @@ export class CreateProductDto {
   @IsNotEmpty()
   price: number;
 
-  image?: string[];
-
-  @IsOptional()
-  discounttag?: boolean;
+  image: string[];
 
   @IsOptional()
   discountprice?: number;
@@ -28,9 +25,6 @@ export class CreateProductDto {
 
   @IsString()
   brand: string;
-
-  @IsOptional()
-  availability?: boolean;
 
   @IsNotEmpty()
   categories: string;

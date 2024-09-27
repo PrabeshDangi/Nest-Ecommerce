@@ -21,7 +21,8 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "Userseed": "ts-node --transpile-only prisma/userSeed.ts",
     "productseed": "ts-node --transpile-only prisma/product.ts",
-    "seed:categories": "ts-node --transpile-only prisma/category.ts"
+    "seed:categories": "ts-node --transpile-only prisma/category.ts",
+    "seedsetup": "npx prisma migrate reset && ts-node --transpile-only prisma/seed.ts"
   },
   "dependencies": {
     "@elastic/elasticsearch": "^8.15.0",
@@ -35,14 +36,15 @@
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/schedule": "^4.1.0",
+    "@nestjs/throttler": "^6.2.1",
     "@prisma/client": "^5.17.0",
     "@supabase/supabase-js": "^2.45.1",
     "@types/body-parser": "^1.19.5",
-    "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
+    "compression": "^1.7.4",
     "cookie-parser": "^1.4.6",
     "dotenv": "^16.4.5",
     "express-rate-limit": "^7.4.0",
@@ -58,7 +60,9 @@
     "rate-limit-redis": "^4.2.0",
     "redis": "^4.7.0",
     "reflect-metadata": "^0.2.0",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "uuid": "^10.0.0",
+    "uuidv4": "^6.2.13"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",

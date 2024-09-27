@@ -17,7 +17,7 @@ import { EmployeeService } from './employee.service';
 import { UpdateEmployeeDTO } from './dto/updateemployee.dto';
 import { CreateEmployeeDTO } from './dto/createemployee.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { JwtGuard } from 'src/api/auth/Guard/Jwt.guard';
+import { JwtGuard } from 'src/api/auth/Guard/Access.guard';
 import { RolesGuard } from 'src/api/auth/Guard/role.guard';
 import { Roles } from 'src/common/decorator/roles.decorators';
 import { Role } from 'src/common/enums/role.enum';
@@ -57,7 +57,7 @@ export class EmployeeController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Patch(":id")
+  @Patch(':id')
   @UseInterceptors(FileInterceptor('image'))
   async updateEmployee(
     @UploadedFile() file: Express.Multer.File,
@@ -73,7 +73,7 @@ export class EmployeeController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Delete(":id")
+  @Delete(':id')
   async deleteEmployee(@Param('id', ParseIntPipe) id: number) {
     try {
       return await this.employeeService.deleteEmployee(id);

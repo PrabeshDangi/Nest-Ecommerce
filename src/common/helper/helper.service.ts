@@ -30,4 +30,21 @@ export class HelperService {
     }
     return OTP;
   }
+
+  async encodeToUUID(input: number): Promise<string> {
+    const hexInput = input.toString(16).padStart(8, '0');
+
+    const randomSegment = () => Math.random().toString(16).slice(2, 6);
+
+    const uuid = `${hexInput}-${randomSegment()}-${randomSegment()}-${randomSegment()}-${randomSegment()}`;
+
+    return uuid;
+  }
+
+  async decodeFromUUID(uuid: string): Promise<number> {
+    const hexInput = uuid.split('-')[0];
+    const decodedValue = parseInt(hexInput, 16);
+
+    return decodedValue;
+  }
 }

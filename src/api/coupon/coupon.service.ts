@@ -44,7 +44,7 @@ export class CouponService {
       await prisma.userCoupon.create({
         data: {
           userId,
-          couponId:couponAvailable.id,
+          couponId: couponAvailable.id,
           isUsed: true,
           usedAt: new Date(),
         },
@@ -94,22 +94,22 @@ export class CouponService {
       ...createcoupondto,
     };
 
-    if (couponData.expirationDate < new Date()) {
+    if (couponData.expirationDate.getDay() < new Date().getDay()) {
       throw new BadRequestException(
         'Expiration date cannot be less than current date!!',
       );
     }
 
     if (couponData.startDate) {
-      if (couponData.start > couponData.expirationDate) {
+      if (couponData.startDate >= couponData.expirationDate) {
         throw new BadRequestException(
-          'Expiration date cannot be less than start date!!',
+          'Expiration date cannot be less than or equal to the start date!!',
         );
       }
 
-      if (couponData.startDate < new Date()) {
+      if (couponData.startDate.getDay() < new Date().getDay()) {
         throw new BadRequestException(
-          'Expiration date and start date cannot be less than current time!!',
+          'Coupon start date cannot be less than current time(day)!!',
         );
       }
 
@@ -123,7 +123,7 @@ export class CouponService {
     return await this.prisma.coupon.create({
       data: {
         ...couponData,
-        startDate: new Date(),
+        startDate: couponData.startDate ? couponData.startDate : new Date(),
       },
     });
   }
@@ -150,23 +150,23 @@ export class CouponService {
     }
 
     if (updateData.startDate) {
-      if (updateData.startDate < new Date()) {
+      if (updateData.startDate.getDay() < new Date().getDay()) {
         throw new BadRequestException(
           'Start date cannot be less than current date!!',
         );
       }
 
-      if (updateData.startDate > couponAvailable.expirationDate) {
+      if (updateData.startDate >= couponAvailable.expirationDate) {
         throw new BadRequestException(
-          'Coupon start date cannot be greater than expiration date!!',
+          'Coupon start date cannot be greater than or equal to the expiration date!!',
         );
       }
     }
 
     if (updateData.expirationDate) {
-      if (updateData.expirationDate < new Date()) {
+      if (updateData.expirationDate.getDay() <= new Date().getDay()) {
         throw new BadRequestException(
-          'Expiration date cannot be less than current date and time!!',
+          'Expiration date cannot be less than or equals to the current date and time!!',
         );
       }
 

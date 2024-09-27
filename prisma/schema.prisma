@@ -7,6 +7,7 @@
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["fullTextSearch", "fullTextIndex"]
+  seed            = "prisma/seed.ts"
 }
 
 datasource db {
@@ -29,19 +30,24 @@ enum Size {
 
 enum CouponType {
   percentage
-  fixed_Amount
+  fixed_amount
 }
 
 enum PaymentGateway {
-  KHALTI
-  ESEWA
-  CONNECTIPS
+  khalti
+  esewa
+  connectips
 }
 
 enum PaymentStatus {
-  SUCCESS
-  PENDING
-  FAILED
+  success
+  pending
+  failed
+}
+
+enum DeliveryStatus {
+  pending
+  dispatched
 }
 
 model User {
@@ -202,6 +208,7 @@ model Coupon {
   expirationDate    DateTime
   startDate         DateTime?
   maxUsageCount     Int
+  minPurchaseAmount Float
   currentUsageCount Int          @default(0)
   isActive          Boolean      @default(true)
   createdAt         DateTime     @default(now())
@@ -218,8 +225,8 @@ model UserCoupon {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  user   User   @relation(fields: [userId], references: [id])
-  coupon Coupon @relation(fields: [couponId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  coupon Coupon @relation(fields: [couponId], references: [id], onDelete: Cascade)
 }
 
 model Payment {
@@ -231,7 +238,7 @@ model Payment {
   dataFromVerificationReq Json?
   apiQueryFromUser        Json?
   paymentGateway          PaymentGateway
-  status                  PaymentStatus  @default(PENDING)
+  status                  PaymentStatus  @default(pending)
   paymentDate             DateTime       @default(now())
   createdAt               DateTime       @default(now())
   updatedAt               DateTime       @updatedAt
@@ -239,11 +246,11 @@ model Payment {
 
 model PurchasedItem {
   id            Int            @id @default(autoincrement())
-  item          String[]
+  item          Int[]
   totalPrice    Float
   purchaseDate  DateTime       @default(now())
   paymentMethod PaymentGateway
-  status        PaymentStatus  @default(PENDING)
+  status        PaymentStatus  @default(pending)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   Invoice       Invoice?
@@ -253,18 +260,19 @@ model PurchasedItem {
 }
 
 model Invoice {
-  id            Int      @id @default(autoincrement())
-  firstName     String
-  lastName      String?
-  country       String
-  streetAddress String
-  postalCode    String
-  phone         String
-  email         String
-  totalPrice    Float
-  orderDate     DateTime @default(now())
-  userId  Int
-  user    User          @relation(fields: [userId], references: [id])
-  orderId Int           @unique
-  order   PurchasedItem @relation(fields: [orderId], references: [id])
+  id             Int            @id @default(autoincrement())
+  firstName      String
+  lastName       String?
+  country        String
+  streetAddress  String
+  postalCode     String
+  phone          String
+  email          String
+  totalPrice     Float
+  orderDate      DateTime       @default(now())
+  deliverystatus DeliveryStatus @default(pending)
+  userId         Int
+  orderId        Int            @unique
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order          PurchasedItem  @relation(fields: [orderId], references: [id])
 }

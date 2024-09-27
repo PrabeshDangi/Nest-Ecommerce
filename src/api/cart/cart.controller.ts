@@ -11,14 +11,15 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CartService } from './cart.service';
-import { JwtGuard } from 'src/api/auth/Guard/Jwt.guard';
+import { JwtGuard } from 'src/api/auth/Guard/Access.guard';
 import { RolesGuard } from 'src/api/auth/Guard/role.guard';
 import { Role } from 'src/common/enums/role.enum';
 import { Roles } from 'src/common/decorator/roles.decorators';
+import { EmailVerifiedGuard } from '../auth/Guard/email-verified.guard';
 
 //@Roles(['admin','user'])
 
-@UseGuards(JwtGuard, RolesGuard)
+@UseGuards(JwtGuard, RolesGuard, EmailVerifiedGuard)
 @Roles(Role.User)
 @Controller('cart')
 export class CartController {

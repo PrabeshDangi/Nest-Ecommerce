@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { RatingService } from './rating.service';
 import { createRatingDTO } from './dto/create-rating.dto';
-import { JwtGuard } from '../auth/Guard/Jwt.guard';
+import { JwtGuard } from '../auth/Guard/Access.guard';
 import { RolesGuard } from '../auth/Guard/role.guard';
 import { Roles } from 'src/common/decorator/roles.decorators';
 import { Role } from 'src/common/enums/role.enum';

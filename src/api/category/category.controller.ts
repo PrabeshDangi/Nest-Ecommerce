@@ -12,12 +12,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
-import { JwtGuard } from '../auth/Guard/Jwt.guard';
+import { JwtGuard } from '../auth/Guard/Access.guard';
 import { RolesGuard } from '../auth/Guard/role.guard';
 import { Roles } from 'src/common/decorator/roles.decorators';
 import { Role } from 'src/common/enums/role.enum';
 import { Public } from 'src/common/decorator/public.decorator';
-import { addCategoryDto } from './dto/addcategory.dto';
+import { AddCategoryDto } from './dto/addcategory.dto';
 
 @UseGuards(JwtGuard, RolesGuard)
 @Roles(Role.Admin)
@@ -32,7 +32,7 @@ export class CategoryController {
   }
 
   @Post('add')
-  addCategory(@Body() addcaetegorydto: addCategoryDto, @Req() req, @Res() res) {
+  addCategory(@Body() addcaetegorydto: AddCategoryDto, @Req() req, @Res() res) {
     return this.categoryService.addCategory(addcaetegorydto, req, res);
   }
 
@@ -48,7 +48,7 @@ export class CategoryController {
   @Patch('update/:id')
   updateCategory(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updatedto: addCategoryDto,
+    @Body() updatedto: AddCategoryDto,
     @Req() req,
     @Res() res,
   ) {
