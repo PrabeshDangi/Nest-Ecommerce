@@ -28,13 +28,13 @@ export class RateLimiterMiddleware implements NestMiddleware {
           req.headers['x-real-ip']?.[0] || req.connection.remoteAddress || '';
       }
       
-
-      return realIP.replace(/^::ffff:/, ''); // Optional: To remove IPv6 prefix if IPv4 is neeeded
+      
+      return realIP.replace(/^::ffff:/, ''); 
     },
   });
 
   use(req: Request, res: Response, next: NextFunction): void {
-
     this.limiter(req, res, next);
   }
 }
+

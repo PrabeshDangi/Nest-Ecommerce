@@ -16,11 +16,10 @@ import { RateLimiterMiddleware } from 'src/common/middlewares/ratelimiting.middl
     HelperService,
   ],
 })
-//export class ProductModule {}
 export class ProductModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(RateLimiterMiddleware)
-      .forRoutes('*');
+      .forRoutes('*');// Yo configuration le sabai route lai rate limit garchha!!
   }
 }

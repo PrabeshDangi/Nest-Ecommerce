@@ -17,9 +17,10 @@ import { RatingModule } from './api/rating/rating.module';
 import { CmsModule } from './api/cms/cms.module';
 import { CouponModule } from './api/coupon/coupon.module';
 import { PaymentModule } from './api/payment/payment.module';
-import { ThrottlerModule } from '@nestjs/throttler';
-import { APP_GUARD } from '@nestjs/core';
-import { CustomThrottlerGuard } from './common/guard/ratelimit.guard';
+//Nosonar
+// import { ThrottlerModule } from '@nestjs/throttler';
+// import { APP_GUARD } from '@nestjs/core';
+// import { CustomThrottlerGuard } from './common/guard/ratelimit.guard';
 
 // global
 @Module({

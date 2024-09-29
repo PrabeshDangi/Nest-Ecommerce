@@ -14,10 +14,4 @@ redisClient.on('error', (err) => {
 
 redisClient.connect().catch(console.error);
 
-// Test Redis connection
-// redisClient.set('test_key', 'test_value').then(() => {
-//   redisClient.get('test_key').then((value) => {
-//     console.log('Redis test value:', value);
-//   });
-//});
 export default redisClient;
