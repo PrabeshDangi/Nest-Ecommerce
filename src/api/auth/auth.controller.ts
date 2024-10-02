@@ -71,6 +71,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Get('test')
   async testQueue() {
-    await this.authService.testQueue();
+    const result = await this.authService.testQueue();
+    return result.message;
   }
 }

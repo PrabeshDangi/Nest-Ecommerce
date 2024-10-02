@@ -10,31 +10,31 @@ export class EmailProcessor extends WorkerHost {
     super();
   }
 
-//   @OnWorkerEvent('completed')
-//   onCompleted(job: Job) {
-//     const { id, name, queueName, finishedOn, returnvalue } = job;
-//     const completionTime = finishedOn ? new Date(finishedOn).toISOString() : '';
-//     this.logger.log(
-//       `Job id: ${id}, name: ${name} completed in queue ${queueName} on ${completionTime}. Result: ${returnvalue}`,
-//     );
-//   }
+  //   @OnWorkerEvent('completed')
+  //   onCompleted(job: Job) {
+  //     const { id, name, queueName, finishedOn, returnvalue } = job;
+  //     const completionTime = finishedOn ? new Date(finishedOn).toISOString() : '';
+  //     this.logger.log(
+  //       `Job id: ${id}, name: ${name} completed in queue ${queueName} on ${completionTime}. Result: ${returnvalue}`,
+  //     );
+  //   }
 
-//   @OnWorkerEvent('failed')
-//   onFailed(job: Job) {
-//     const { id, name, queueName, failedReason } = job;
-//     this.logger.error(
-//       `Job id: ${id}, name: ${name} failed in queue ${queueName}. Failed reason: ${failedReason}`,
-//     );
-//   }
+  //   @OnWorkerEvent('failed')
+  //   onFailed(job: Job) {
+  //     const { id, name, queueName, failedReason } = job;
+  //     this.logger.error(
+  //       `Job id: ${id}, name: ${name} failed in queue ${queueName}. Failed reason: ${failedReason}`,
+  //     );
+  //   }
 
-//   @OnWorkerEvent('active')
-//   onActive(job: Job) {
-//     const { id, name, queueName, timestamp } = job;
-//     const startTime = timestamp ? new Date(timestamp).toISOString() : '';
-//     this.logger.log(
-//       `Job id: ${id}, name: ${name} starts in queue ${queueName} on ${startTime}.`,
-//     );
-//   }
+  //   @OnWorkerEvent('active')
+  //   onActive(job: Job) {
+  //     const { id, name, queueName, timestamp } = job;
+  //     const startTime = timestamp ? new Date(timestamp).toISOString() : '';
+  //     this.logger.log(
+  //       `Job id: ${id}, name: ${name} starts in queue ${queueName} on ${startTime}.`,
+  //     );
+  //   }
 
   async process(job: Job<{ email: string; token: string }>): Promise<any> {
     //const { email, token } = job.data;
@@ -49,7 +49,9 @@ export class EmailProcessor extends WorkerHost {
   }
 
   async handleQueue() {
-    setTimeout(() => {}, 3000);
+    setTimeout(() => {
+      console.log('Kati time lagne rechha herdin na ta hami nee!!');
+    }, 3000);
   }
 
   @OnWorkerEvent('completed')

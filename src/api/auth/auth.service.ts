@@ -232,8 +232,9 @@ export class AuthService {
   }
 
   async testQueue() {
-    setTimeout(() => {
-      return { message: 'This is from test Queue endpoint!!' };
-    }, 1000);
+    await this.sendEmailToQueue.add('jot ko naam', {
+      data: 'This is dummy data!',
+    });
+    return { message: 'This is from test Queue endpoint!!' };
   }
 }

@@ -8,7 +8,7 @@ import { AuthService } from './auth.service';
 import { EmailModule } from 'src/global/email/email.module';
 import { AtStrategy, RtStrategy } from './Strategies';
 import { BullModule } from '@nestjs/bullmq';
-import { emailQueueConfig } from 'src/common/config/queue.config';
+import { bullConfig, emailQueueConfig } from 'src/common/config/queue.config';
 import { EmailProcessor } from './auth.process';
 
 @Module({
@@ -24,10 +24,8 @@ import { EmailProcessor } from './auth.process';
       secret: process.env.REFRESH_SECRET,
       signOptions: { expiresIn: process.env.REFRESH_EXPIRY },
     }),
-    BullModule.registerQueue({
-      name: 'email-queue',
-    }),
-    //emailQueueConfig,
+    BullModule.forRoot(bullConfig),
+    BullModule.registerQueue(emailQueueConfig),
   ],
   controllers: [AuthController],
   providers: [

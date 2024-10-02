@@ -1,11 +1,14 @@
-import { BullModule } from '@nestjs/bullmq';
-
-//Configuration can be different, but testing ko lagi same conf we are using here!!
-export const emailQueueConfig = BullModule.forRoot('emailQueue', {
+// Global connection configuration
+export const bullConfig = {
   connection: {
-    host: '172.19.0.2',
-    port: 6739,
+    host: 'localhost',
+    port: 6379,
   },
+};
+
+// Queue-specific configurations
+export const emailQueueConfig = {
+  name: 'email-queue',
   defaultJobOptions: {
     attempts: 3,
     backoff: {
@@ -19,13 +22,10 @@ export const emailQueueConfig = BullModule.forRoot('emailQueue', {
       age: 5 * 60,
     },
   },
-});
+};
 
-export const paymentQueueConfig = BullModule.forRoot('paymentQueue', {
-  connection: {
-    host: '172.19.0.2',
-    port: 6739,
-  },
+export const paymentQueueConfig = {
+  name: 'payment-queue',
   defaultJobOptions: {
     attempts: 3,
     backoff: {
@@ -39,13 +39,10 @@ export const paymentQueueConfig = BullModule.forRoot('paymentQueue', {
       age: 5 * 60,
     },
   },
-});
+};
 
-export const imageUploadQueue = BullModule.forRoot('imageUploadQueue', {
-  connection: {
-    host: '172.19.0.2',
-    port: 6739,
-  },
+export const imageUploadQueueConfig = {
+  name: 'image-upload-queue',
   defaultJobOptions: {
     attempts: 3,
     backoff: {
@@ -59,4 +56,4 @@ export const imageUploadQueue = BullModule.forRoot('imageUploadQueue', {
       age: 5 * 60,
     },
   },
-});
+};
