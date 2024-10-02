@@ -5,7 +5,7 @@ import { CreateStatDTO } from './dto/createstat.dto';
 
 @Injectable()
 export class StatisticsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
   async getStat() {
     const stats = await this.prisma.statistics.findMany();
 

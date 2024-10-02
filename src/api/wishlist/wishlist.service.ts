@@ -10,7 +10,7 @@ import { PrismaService } from 'src/global/prisma/prisma.service';
 
 @Injectable()
 export class WishlistService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async getMyWishlist(req: Request, res: Response) {
     const user = req.user as { id: number; email: string };

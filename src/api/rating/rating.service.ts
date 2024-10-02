@@ -10,7 +10,7 @@ import { updateRatingDTO } from './dto/update-rating.dto';
 
 @Injectable()
 export class RatingService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async getRating(id: number) {
     const itemAvailable = await this.prisma.product.findUnique({

@@ -9,7 +9,7 @@ import { PrismaService } from 'src/global/prisma/prisma.service';
 
 @Injectable()
 export class CartService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async getMyCart(req: Request, res: Response) {
     const user = req.user as { id: number; email: string };

@@ -9,7 +9,7 @@ import { Request, Response } from 'express';
 
 @Injectable()
 export class BannerService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async getBannerItem(res: Response) {
     const bannerItems = await this.prisma.banner.findMany({

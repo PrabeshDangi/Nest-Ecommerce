@@ -18,9 +18,9 @@ import {
 @Injectable()
 export class AuthService {
   constructor(
-    private prisma: PrismaService,
-    private jwt: JwtService,
-    private emailService: EmailService,
+    private readonly prisma: PrismaService,
+    private readonly jwt: JwtService,
+    private readonly emailService: EmailService,
   ) {}
 
   async SignupUser(signupdto: SignupDto, res: Response) {

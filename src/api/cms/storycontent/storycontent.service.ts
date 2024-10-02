@@ -11,8 +11,8 @@ import { UpdateStoryDTO } from './dto/updatestory.dto';
 @Injectable()
 export class StorycontentService {
   constructor(
-    private prisma: PrismaService,
-    private uploadImage: ImageUploadService,
+    private readonly prisma: PrismaService,
+    private readonly uploadImage: ImageUploadService,
   ) {}
 
   async getStory() {
@@ -59,7 +59,7 @@ export class StorycontentService {
   }
 
   async updateStory(file: Express.Multer.File, updatestorydto: UpdateStoryDTO) {
-    const { title, body} = updatestorydto;
+    const { title, body } = updatestorydto;
     const content = await this.prisma.storycontent.findFirst();
 
     const updateData: any = {
@@ -70,7 +70,7 @@ export class StorycontentService {
     if (file) {
       const imageUrl = await this.uploadImage.uploadImage(file);
       updateData.image = imageUrl;
-    } 
+    }
 
     if (!content) {
       throw new NotFoundException('Story content not found!!');
@@ -82,8 +82,4 @@ export class StorycontentService {
     });
     return updatedStory;
   }
-
-
-
-
 }

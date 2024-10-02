@@ -12,8 +12,8 @@ import { UpdateServiceDTO } from './dto/updateservice.dto';
 @Injectable()
 export class ServicesService {
   constructor(
-    private prisma: PrismaService,
-    private uploadImageService: ImageUploadService,
+    private readonly prisma: PrismaService,
+    private readonly uploadImageService: ImageUploadService,
   ) {}
 
   async getServices() {

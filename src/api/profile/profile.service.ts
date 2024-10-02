@@ -18,9 +18,9 @@ import { resetPasswordDTO } from './dto/resetPassword.dto';
 @Injectable()
 export class ProfileService {
   constructor(
-    private prisma: PrismaService,
-    private helperService: HelperService,
-    private emailService: EmailService,
+    private readonly prisma: PrismaService,
+    private readonly helperService: HelperService,
+    private readonly emailService: EmailService,
   ) {}
 
   async getMyProfile(req: Request, res: Response) {

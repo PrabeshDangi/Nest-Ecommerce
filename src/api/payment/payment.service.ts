@@ -14,8 +14,8 @@ import { HelperService } from 'src/common/helper/helper.service';
 @Injectable()
 export class PaymentService {
   constructor(
-    private prisma: PrismaService,
-    private helperservice: HelperService,
+    private readonly prisma: PrismaService,
+    private readonly helperservice: HelperService,
   ) {}
 
   async initializePayment(

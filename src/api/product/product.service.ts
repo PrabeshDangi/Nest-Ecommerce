@@ -15,9 +15,9 @@ import { HelperService } from 'src/common/helper/helper.service';
 @Injectable()
 export class ProductService {
   constructor(
-    private prisma: PrismaService,
-    private ImageService: ImageUploadService,
-    private HelperService: HelperService,
+    private readonly prisma: PrismaService,
+    private readonly ImageService: ImageUploadService,
+    private readonly HelperService: HelperService,
   ) {}
 
   async searchProduct(sstring: string) {

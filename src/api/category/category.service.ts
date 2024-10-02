@@ -9,7 +9,7 @@ import { AddCategoryDto } from './dto/addcategory.dto';
 
 @Injectable()
 export class CategoryService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async getCategories(req: Request, res: Response) {
     const categories = await this.prisma.category.findMany();

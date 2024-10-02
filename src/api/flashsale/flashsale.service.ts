@@ -11,7 +11,7 @@ import { AddFlashDto } from './dto/addItem.dto';
 
 @Injectable()
 export class FlashsaleService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async getAllFlashItems() {
     const flashItems = await this.prisma.flashitem.findMany({

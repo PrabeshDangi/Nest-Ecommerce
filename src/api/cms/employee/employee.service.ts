@@ -7,8 +7,8 @@ import { ImageUploadService } from 'src/global/services/imageupload.service';
 @Injectable()
 export class EmployeeService {
   constructor(
-    private prisma: PrismaService,
-    private uploadImageService: ImageUploadService,
+    private readonly prisma: PrismaService,
+    private readonly uploadImageService: ImageUploadService,
   ) {}
   async getEmployees() {
     const employees = await this.prisma.employee.findMany();
