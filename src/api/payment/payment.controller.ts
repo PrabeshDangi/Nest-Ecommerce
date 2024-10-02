@@ -44,8 +44,8 @@ export class PaymentController {
   }
 
   @Post('/verify')
-  async completePayment(@Query('data') query: string, @Res() res) {
-    return await this.paymentService.completePayment(query, res);
+  async completePayment(@Query('data') data: string, @Res() res) {
+    return await this.paymentService.completePayment(data, res);
   }
 
   @HttpCode(HttpStatus.OK)
