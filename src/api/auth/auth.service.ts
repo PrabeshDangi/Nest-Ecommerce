@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { SignupDto } from './dto/register.dto';
@@ -9,63 +10,69 @@ import { LoginDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
 import { Request, Response } from 'express';
 import { PrismaService } from 'src/global/prisma/prisma.service';
-import { EmailService } from 'src/global/email/email.service';
 import {
   accessTokenOption,
   refreshTokenOption,
 } from 'src/global/Constants/cookie.option';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 
 @Injectable()
 export class AuthService {
   constructor(
+    @InjectQueue('email-queue')
+    private readonly sendEmailToQueue: Queue,
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
-    private readonly emailService: EmailService,
   ) {}
 
   async SignupUser(signupdto: SignupDto, res: Response) {
-    const { name, email, phone, password } = signupdto;
+    try {
+      const { name, email, phone, password } = signupdto;
 
-    const isUserAvailable = await this.prisma.user.findUnique({
-      where: { email },
-    });
-
-    if (isUserAvailable) {
-      throw new BadRequestException('Email already registered!!');
-    }
-
-    const hashedpassword = await this.hashPassword(password);
-
-    const newuser = await this.prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedpassword,
-        phone,
-        role: signupdto.role || 'user',
-      },
-    });
-
-    const verificationToken = await this.generateEmailVerificationToken(
-      newuser.email,
-    );
-
-    await this.emailService.sendVerificationEmail(
-      newuser.email,
-      verificationToken,
-    );
-
-    return res
-      .cookie('email_verification_token', verificationToken, {
-        httpOnly: true,
-        secure: false, //true for https
-        sameSite: 'lax',
-        maxAge: 2 * 60 * 1000,
-      })
-      .json({
-        message: 'Please verify your email',
-        data: newuser,
+      const isUserAvailable = await this.prisma.user.findUnique({
+        where: { email },
       });
+
+      if (isUserAvailable) {
+        throw new BadRequestException('Email already registered!!');
+      }
+
+      const hashedpassword = await this.hashPassword(password);
+
+      const newuser = await this.prisma.user.create({
+        data: {
+          name,
+          email,
+          password: hashedpassword,
+          phone,
+          role: signupdto.role || 'user',
+        },
+      });
+
+      const verificationToken = await this.generateEmailVerificationToken(
+        newuser.email,
+      );
+
+      await this.sendEmailToQueue.add('sendEmailJob', {
+        email: newuser.email,
+        token: verificationToken,
+      });
+
+      return res
+        .cookie('email_verification_token', verificationToken, {
+          httpOnly: true,
+          secure: false,
+          sameSite: 'lax',
+          maxAge: 2 * 60 * 1000,
+        })
+        .json({
+          message: 'Please verify your email',
+          data: newuser,
+        });
+    } catch (error) {
+      throw new InternalServerErrorException('Signup failed');
+    }
   }
 
   async SigninUser(signindto: LoginDto, res: Response) {
@@ -222,5 +229,11 @@ export class AuthService {
       { email },
       { secret: process.env.JWT_SECRET, expiresIn: '2m' },
     );
+  }
+
+  async testQueue() {
+    setTimeout(() => {
+      return { message: 'This is from test Queue endpoint!!' };
+    }, 1000);
   }
 }

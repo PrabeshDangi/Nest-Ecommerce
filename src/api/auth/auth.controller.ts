@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Post,
@@ -61,9 +62,15 @@ export class AuthController {
       .cookie('refresh_token', tokens.refreshToken, refreshTokenOption)
       .cookie('access_token', tokens.accessToken, accessTokenOption)
       .json({
-        message:"Token refreshed successfully!!",
-        refreshtoken:tokens.refreshToken,
-        accesstoken:tokens.accessToken
-      })
+        message: 'Token refreshed successfully!!',
+        refreshtoken: tokens.refreshToken,
+        accesstoken: tokens.accessToken,
+      });
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Get('test')
+  async testQueue() {
+    await this.authService.testQueue();
   }
 }
