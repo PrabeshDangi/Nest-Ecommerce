@@ -26,49 +26,48 @@ export class AuthService {
   ) {}
 
   async SignupUser(signupdto: SignupDto, res: Response) {
-      const { name, email, phone, password } = signupdto;
+    const { name, email, phone, password } = signupdto;
 
-      const isUserAvailable = await this.prisma.user.findUnique({
-        where: { email },
+    const isUserAvailable = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (isUserAvailable) {
+      throw new BadRequestException('Email already registered!!');
+    }
+
+    const hashedpassword = await this.hashPassword(password);
+
+    const newuser = await this.prisma.user.create({
+      data: {
+        name,
+        email,
+        password: hashedpassword,
+        phone,
+        role: signupdto.role || 'user',
+      },
+    });
+
+    const verificationToken = await this.generateEmailVerificationToken(
+      newuser.email,
+    );
+
+    await this.sendEmailToQueue.add('sendEmailJob', {
+      email: newuser.email,
+      token: verificationToken,
+    });
+
+    return res
+      .cookie('email_verification_token', verificationToken, {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax',
+        maxAge: 2 * 60 * 1000,
+      })
+      .json({
+        message: 'Please verify your email',
+        data: newuser,
       });
-
-      if (isUserAvailable) {
-        throw new BadRequestException('Email already registered!!');
-      }
-
-      const hashedpassword = await this.hashPassword(password);
-
-      const newuser = await this.prisma.user.create({
-        data: {
-          name,
-          email,
-          password: hashedpassword,
-          phone,
-          role: signupdto.role || 'user',
-        },
-      });
-
-      const verificationToken = await this.generateEmailVerificationToken(
-        newuser.email,
-      );
-
-      await this.sendEmailToQueue.add('sendEmailJob', {
-        email: newuser.email,
-        token: verificationToken,
-      });
-
-      return res
-        .cookie('email_verification_token', verificationToken, {
-          httpOnly: true,
-          secure: false,
-          sameSite: 'lax',
-          maxAge: 2 * 60 * 1000,
-        })
-        .json({
-          message: 'Please verify your email',
-          data: newuser,
-        });
-    
   }
 
   async SigninUser(signindto: LoginDto, res: Response) {
@@ -226,11 +225,4 @@ export class AuthService {
       { secret: process.env.JWT_SECRET, expiresIn: '2m' },
     );
   }
-
-  // async testQueue() {
-  //   await this.sendEmailToQueue.add('jot ko naam', {
-  //     data: 'This is dummy data!',
-  //   });
-  //   return { message: 'This is from test Queue endpoint!!' };
-  // }
 }

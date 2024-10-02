@@ -66,11 +66,4 @@ export class AuthController {
         accesstoken: tokens.accessToken,
       });
   }
-
-  // @HttpCode(HttpStatus.OK)
-  // @Get('test')
-  // async testQueue() {
-  //   const result = await this.authService.testQueue();
-  //   return result.message;
-  // }
 }
