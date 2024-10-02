@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   Injectable,
-  InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { SignupDto } from './dto/register.dto';
@@ -27,7 +26,6 @@ export class AuthService {
   ) {}
 
   async SignupUser(signupdto: SignupDto, res: Response) {
-    try {
       const { name, email, phone, password } = signupdto;
 
       const isUserAvailable = await this.prisma.user.findUnique({
@@ -70,9 +68,7 @@ export class AuthService {
           message: 'Please verify your email',
           data: newuser,
         });
-    } catch (error) {
-      throw new InternalServerErrorException('Signup failed');
-    }
+    
   }
 
   async SigninUser(signindto: LoginDto, res: Response) {
@@ -231,10 +227,10 @@ export class AuthService {
     );
   }
 
-  async testQueue() {
-    await this.sendEmailToQueue.add('jot ko naam', {
-      data: 'This is dummy data!',
-    });
-    return { message: 'This is from test Queue endpoint!!' };
-  }
+  // async testQueue() {
+  //   await this.sendEmailToQueue.add('jot ko naam', {
+  //     data: 'This is dummy data!',
+  //   });
+  //   return { message: 'This is from test Queue endpoint!!' };
+  // }
 }

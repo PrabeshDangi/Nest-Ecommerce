@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Get,
   HttpCode,
   HttpStatus,
   Post,
@@ -68,10 +67,10 @@ export class AuthController {
       });
   }
 
-  @HttpCode(HttpStatus.OK)
-  @Get('test')
-  async testQueue() {
-    const result = await this.authService.testQueue();
-    return result.message;
-  }
+  // @HttpCode(HttpStatus.OK)
+  // @Get('test')
+  // async testQueue() {
+  //   const result = await this.authService.testQueue();
+  //   return result.message;
+  // }
 }
