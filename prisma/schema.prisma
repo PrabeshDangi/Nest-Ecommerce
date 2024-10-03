@@ -121,6 +121,7 @@ model Flashitem {
 model Category {
   id       Int       @id @default(autoincrement())
   name     String
+  image    String?
   products Product[] @relation("ProductCategories")
 }
 
