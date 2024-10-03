@@ -18,32 +18,6 @@ export class PaymentProcessor extends WorkerHost {
     super();
   }
 
-  @OnWorkerEvent('completed')
-  onCompleted(job: Job) {
-    const { id, name, queueName, finishedOn, returnvalue } = job;
-    const completionTime = finishedOn ? new Date(finishedOn).toISOString() : '';
-    this.logger.log(
-      `Job id: ${id}, name: ${name} completed in queue ${queueName} on ${completionTime}. Result: ${returnvalue}`,
-    );
-  }
-
-  @OnWorkerEvent('failed')
-  onFailed(job: Job) {
-    const { id, name, queueName, failedReason } = job;
-    this.logger.error(
-      `Job id: ${id}, name: ${name} failed in queue ${queueName}. Failed reason: ${failedReason}`,
-    );
-  }
-
-  @OnWorkerEvent('active')
-  onActive(job: Job) {
-    const { id, name, queueName, timestamp } = job;
-    const startTime = timestamp ? new Date(timestamp).toISOString() : '';
-    this.logger.log(
-      `Job id: ${id}, name: ${name} starts in queue ${queueName} on ${startTime}.`,
-    );
-  }
-
   async process(job: Job<any, any, string>): Promise<any> {
     switch (job.name) {
       case 'initialize-payment-job': {
@@ -252,5 +226,31 @@ export class PaymentProcessor extends WorkerHost {
       console.log(error);
       throw error;
     }
+  }
+
+  @OnWorkerEvent('completed')
+  onCompleted(job: Job) {
+    const { id, name, queueName, finishedOn, returnvalue } = job;
+    const completionTime = finishedOn ? new Date(finishedOn).toISOString() : '';
+    this.logger.log(
+      `Job id: ${id}, name: ${name} completed in queue ${queueName} on ${completionTime}. Result: ${returnvalue}`,
+    );
+  }
+
+  @OnWorkerEvent('failed')
+  onFailed(job: Job) {
+    const { id, name, queueName, failedReason } = job;
+    this.logger.error(
+      `Job id: ${id}, name: ${name} failed in queue ${queueName}. Failed reason: ${failedReason}`,
+    );
+  }
+
+  @OnWorkerEvent('active')
+  onActive(job: Job) {
+    const { id, name, queueName, timestamp } = job;
+    const startTime = timestamp ? new Date(timestamp).toISOString() : '';
+    this.logger.log(
+      `Job id: ${id}, name: ${name} starts in queue ${queueName} on ${startTime}.`,
+    );
   }
 }
