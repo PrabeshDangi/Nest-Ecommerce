@@ -20,6 +20,7 @@ import { PaymentModule } from './api/payment/payment.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { CustomThrottlerGuard } from './common/guard/ratelimit.guard';
+import { RedisService } from './global/services/redis.service';
 
 // global
 @Module({
@@ -63,11 +64,13 @@ import { CustomThrottlerGuard } from './common/guard/ratelimit.guard';
     PaymentModule,
   ],
   controllers: [],
-  providers: [SaleScheduler,
+  providers: [
+    SaleScheduler,
     {
       provide: APP_GUARD,
       useClass: CustomThrottlerGuard,
     },
+    RedisService,
   ],
 })
 export class AppModule {}

@@ -11,6 +11,7 @@ import { UpdateProductDto } from './dto/updateproduct.dto';
 import { PrismaService } from 'src/global/prisma/prisma.service';
 import { ImageUploadService } from 'src/global/services/imageupload.service';
 import { HelperService } from 'src/common/helper/helper.service';
+import { redisClient } from 'src/common/config/redis.config';
 
 @Injectable()
 export class ProductService {
@@ -49,40 +50,53 @@ export class ProductService {
   }
 
   async getAllProducts(res: Response) {
-    const products = await this.prisma.product.findMany({
-      include: {
-        categories: true,
-        banners: {
-          select: {
-            id: true,
+    let products = await redisClient.get('all-products');
+
+    if (!products) {
+      const products = await this.prisma.product.findMany({
+        include: {
+          categories: true,
+          banners: {
+            select: {
+              id: true,
+            },
+          },
+          ratings: {
+            select: {
+              rating: true,
+              comment: true,
+            },
           },
         },
-        ratings: {
-          select: {
-            rating: true,
-            comment: true,
-          },
-        },
-      },
-    });
+      });
 
-    const productsWithRatings = products.map((product) => {
-      const ratings = product.ratings;
-      const totalRatings = ratings.length;
+      const productsWithRatings = products.map((product) => {
+        const ratings = product.ratings;
+        const totalRatings = ratings.length;
 
-      const averageRating =
-        totalRatings > 0
-          ? ratings.reduce((sum, r) => sum + r.rating, 0) / totalRatings
-          : 0;
+        const averageRating =
+          totalRatings > 0
+            ? ratings.reduce((sum, r) => sum + r.rating, 0) / totalRatings
+            : 0;
 
-      return {
-        ...product,
-        totalRatings,
-        averageRating: parseFloat(averageRating.toFixed(2)),
-      };
-    });
+        return {
+          ...product,
+          totalRatings,
+          averageRating: parseFloat(averageRating.toFixed(2)),
+        };
+      });
 
-    res.json(productsWithRatings);
+      await redisClient.set(
+        'all-products',
+        JSON.stringify(productsWithRatings),
+        'EX',
+        60,
+      );
+
+      return res.json(productsWithRatings);
+    }
+
+    res.json(JSON.parse(products));
   }
 
   async getProduct(id: number, res: Response) {
@@ -279,6 +293,11 @@ export class ProductService {
       },
     });
 
+    redisClient.publish(
+      'product-updated',
+      JSON.stringify({ action: 'update', productId: id }),
+    );
+
     return res.status(200).json({
       message: 'Product updated successfully!',
       data: updatedProduct,
@@ -307,6 +326,11 @@ export class ProductService {
         id,
       },
     });
+
+    redisClient.publish(
+      'product-delete',
+      JSON.stringify({ action: 'delete', productId: id }),
+    );
 
     return res.status(200).json({
       message: 'Product deleted successfully!!',
